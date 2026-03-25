@@ -23,9 +23,14 @@ create policy "users_read_own" on users for select to authenticated
   using (id = auth.uid());
 
 -- user_progress: user reads and writes own rows
+-- Note: no DELETE policy is intentional — row deletion is handled by FK cascade when users are deleted.
+-- Admin deletions go through service-role client which bypasses RLS.
 create policy "progress_read_own" on user_progress for select to authenticated
   using (user_id = auth.uid());
 create policy "progress_write_own" on user_progress for insert to authenticated
   with check (user_id = auth.uid());
 create policy "progress_update_own" on user_progress for update to authenticated
-  using (user_id = auth.uid());
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- site_settings: no read policy for authenticated — all reads go through service-role client (server-side only).
+-- This is intentional: settings are not exposed to browser clients.

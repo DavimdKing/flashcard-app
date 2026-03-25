@@ -6,7 +6,7 @@ create extension if not exists moddatetime schema extensions;
 
 -- words
 create table words (
-  id uuid primary key,
+  id uuid primary key default gen_random_uuid(),
   english_word text not null,
   thai_translation text not null,
   image_url text not null,
