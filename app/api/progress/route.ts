@@ -37,7 +37,7 @@ export async function GET(request: Request) {
     .select('word_id')
     .eq('set_id', setId)
 
-  const total = setWords?.length ?? 10
+  const total = setWords?.length ?? 0
 
   const { data: progress } = await service
     .from('user_progress')

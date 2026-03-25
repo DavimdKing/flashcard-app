@@ -13,6 +13,8 @@ describe('buildProgressResponse', () => {
     const response = buildProgressResponse('set-1', results, 10)
     expect(response.graded).toBe(2)
     expect(response.total).toBe(10)
+    expect(response.set_id).toBe('set-1')
+    expect(response.results).toEqual(results)
   })
 })
 
@@ -26,5 +28,14 @@ describe('validateProgressBody', () => {
   })
   it('rejects missing fields', () => {
     expect(validateProgressBody({ set_id: 's', result: 'got_it' })).toBe(false)
+  })
+  it('rejects null', () => {
+    expect(validateProgressBody(null)).toBe(false)
+  })
+  it('rejects bare string', () => {
+    expect(validateProgressBody('hello')).toBe(false)
+  })
+  it('rejects empty object', () => {
+    expect(validateProgressBody({})).toBe(false)
   })
 })
