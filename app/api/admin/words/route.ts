@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { synthesizeSpeech } from '@/lib/tts'
 import { NextResponse } from 'next/server'
+import { PARTS_OF_SPEECH } from '@/lib/constants'
 
 async function requireAdmin() {
   const supabase = await createClient()
@@ -18,10 +19,14 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => null)
   if (!body) return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
-  const { id, english_word, thai_translation, image_url } = body
+  const { id, english_word, thai_translation, image_url, part_of_speech, english_example, thai_example } = body
 
   if (!id || !english_word || !thai_translation || !image_url) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+  }
+
+  if (part_of_speech != null && !(PARTS_OF_SPEECH as readonly string[]).includes(part_of_speech)) {
+    return NextResponse.json({ error: 'Invalid part_of_speech' }, { status: 400 })
   }
 
   const service = createServiceClient()
@@ -38,7 +43,12 @@ export async function POST(request: Request) {
     audio_warning = true
   }
 
-  const { error } = await service.from('words').insert({ id, english_word, thai_translation, image_url, audio_url })
+  const { error } = await service.from('words').insert({
+    id, english_word, thai_translation, image_url, audio_url,
+    part_of_speech: part_of_speech ?? null,
+    english_example: english_example ?? null,
+    thai_example: thai_example ?? null,
+  })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   return NextResponse.json({ ok: true, audio_warning })
