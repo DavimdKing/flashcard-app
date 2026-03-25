@@ -24,7 +24,7 @@ export default function FlashCard({ word, onFlipped, bgGradient }: Props) {
     setTimeout(() => setIgnoreClicks(false), 500)
   }, [isFlipped, ignoreClicks, onFlipped])
 
-  const imgVisible = isFlipped ? '' : 'opacity-0'
+  const imgVisible = isFlipped ? '' : 'opacity-0 pointer-events-none'
 
   return (
     <div
@@ -72,7 +72,7 @@ export default function FlashCard({ word, onFlipped, bgGradient }: Props) {
 
           {/* Part of speech */}
           {word.part_of_speech && (
-            <p className="text-sm font-medium text-white/80 tracking-wide uppercase">{word.part_of_speech}</p>
+            <p className="text-sm font-semibold text-yellow-200 tracking-wide uppercase">{word.part_of_speech}</p>
           )}
 
           {/* Image or placeholder */}
@@ -89,13 +89,13 @@ export default function FlashCard({ word, onFlipped, bgGradient }: Props) {
 
           {/* Example sentences */}
           {word.english_example && (
-            <p className="text-sm text-white text-center px-2 leading-relaxed">{word.english_example}</p>
+            <p className="text-sm text-white font-medium text-center px-2 leading-relaxed">{word.english_example}</p>
           )}
           {word.english_example && word.thai_example && (
-            <div className="w-10 h-px bg-white/30" />
+            <div className="w-10 h-px bg-white/40" />
           )}
           {word.thai_example && (
-            <p className="text-sm text-white text-center px-2 leading-relaxed">{word.thai_example}</p>
+            <p className="text-sm text-white font-medium text-center px-2 leading-relaxed">{word.thai_example}</p>
           )}
         </div>
       </div>
