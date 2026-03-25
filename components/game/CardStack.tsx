@@ -49,7 +49,7 @@ export default function CardStack({ initialSet, initialProgress }: Props) {
     const assetCount = words.length * 2
     const checkDone = () => { if (++loaded >= assetCount) { clearTimeout(timeout); setPreloading(false) } }
     words.forEach(w => {
-      const img = new Image(); img.onload = img.onerror = checkDone; img.src = w.image_url
+      const img = new Image(); img.onload = img.onerror = checkDone; img.src = w.image_url ?? ''
       if (w.audio_url) {
         const audio = new Audio(); audio.oncanplaythrough = audio.onerror = checkDone; audio.src = w.audio_url
       } else { checkDone() }

@@ -11,6 +11,9 @@ const words: DailySetResponse['words'] = Array.from({ length: 10 }, (_, i) => ({
   thai_translation: `คำ${i}`,
   image_url: `/img${i}.jpg`,
   audio_url: null,
+  part_of_speech: null,
+  english_example: null,
+  thai_example: null,
 }))
 
 describe('ScoreScreen', () => {

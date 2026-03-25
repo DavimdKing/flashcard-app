@@ -40,6 +40,9 @@ export default async function PlayPage() {
       thai_translation: w.words.thai_translation,
       image_url: w.words.image_url,
       audio_url: w.words.audio_url,
+      part_of_speech: w.words.part_of_speech ?? null,
+      english_example: w.words.english_example ?? null,
+      thai_example: w.words.thai_example ?? null,
     }))
     .sort((a: any, b: any) => a.position - b.position)
 

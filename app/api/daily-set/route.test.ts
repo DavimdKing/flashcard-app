@@ -9,8 +9,8 @@ describe('buildDailySetResponse', () => {
     const setId = 'set-1'
     const setDate = '2026-03-25'
     const rows = [
-      { word_id: 'w2', position: 2, english_word: 'Cat', thai_translation: 'แมว', image_url: 'img2', audio_url: null },
-      { word_id: 'w1', position: 1, english_word: 'Dog', thai_translation: 'สุนัข', image_url: 'img1', audio_url: 'audio1' },
+      { word_id: 'w2', position: 2, english_word: 'Cat', thai_translation: 'แมว', image_url: 'img2', audio_url: null, part_of_speech: null, english_example: null, thai_example: null },
+      { word_id: 'w1', position: 1, english_word: 'Dog', thai_translation: 'สุนัข', image_url: 'img1', audio_url: 'audio1', part_of_speech: null, english_example: null, thai_example: null },
     ]
 
     const result = buildDailySetResponse(setId, setDate, rows)

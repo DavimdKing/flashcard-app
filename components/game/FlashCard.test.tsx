@@ -8,6 +8,9 @@ const mockWord = {
   thai_translation: 'ช้าง',
   image_url: '/elephant.jpg',
   audio_url: null,
+  part_of_speech: null,
+  english_example: null,
+  thai_example: null,
 }
 
 describe('FlashCard', () => {
