@@ -32,10 +32,16 @@ export default async function WordsPage({
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Word Database</h2>
-        <Link href="/admin/words/new"
-          className="bg-purple-500 hover:bg-purple-600 text-white font-semibold px-4 py-2 rounded-xl transition">
-          + Add Word
-        </Link>
+        <div className="flex gap-3">
+          <Link href="/admin/words/import"
+            className="bg-white border border-purple-300 text-purple-600 font-semibold px-4 py-2 rounded-xl hover:bg-purple-50 transition text-sm">
+            Import from Excel
+          </Link>
+          <Link href="/admin/words/new"
+            className="bg-purple-500 hover:bg-purple-600 text-white font-semibold px-4 py-2 rounded-xl transition">
+            + Add Word
+          </Link>
+        </div>
       </div>
 
       <div className="flex gap-3 mb-4">
