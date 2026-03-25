@@ -31,12 +31,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
   }
 
-  const { word_id, english_word } = await request.json()
-  if (!word_id || !english_word) {
+  const body = await request.json().catch(() => null)
+  if (!body || !body.word_id || !body.english_word) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
   }
+  const { word_id, english_word } = body as { word_id: string; english_word: string }
 
-  const audioBuffer = await synthesizeSpeech(english_word)
+  let audioBuffer: Buffer
+  try {
+    audioBuffer = await synthesizeSpeech(english_word)
+  } catch {
+    return NextResponse.json({ error: 'TTS synthesis failed' }, { status: 500 })
+  }
 
   const service = createServiceClient()
   const filePath = `tts/${word_id}.mp3`
@@ -50,7 +56,11 @@ export async function POST(request: Request) {
 
   const { data: { publicUrl } } = service.storage.from('tts').getPublicUrl(filePath)
 
-  await service.from('words').update({ audio_url: publicUrl }).eq('id', word_id)
+  const { error: updateError } = await service
+    .from('words').update({ audio_url: publicUrl }).eq('id', word_id)
+  if (updateError) {
+    return NextResponse.json({ error: 'Failed to update word' }, { status: 500 })
+  }
 
   return NextResponse.json({ audio_url: publicUrl })
 }
