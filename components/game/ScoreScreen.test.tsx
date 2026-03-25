@@ -24,4 +24,13 @@ describe('ScoreScreen', () => {
     render(<ScoreScreen words={words} results={[]} onPlayAgain={() => {}} />)
     expect(screen.getByRole('button', { name: /play again/i })).toBeInTheDocument()
   })
+
+  it('fires confetti when score >= 7', async () => {
+    const confettiMock = jest.requireMock('canvas-confetti') as jest.Mock
+    const results: ProgressResult[] = words.slice(0, 8).map(w => ({ word_id: w.word_id, result: 'got_it' }))
+    render(<ScoreScreen words={words} results={results} onPlayAgain={() => {}} />)
+    // Wait for useEffect
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(confettiMock).toHaveBeenCalledWith({ particleCount: 150, spread: 70 })
+  })
 })

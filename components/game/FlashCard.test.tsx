@@ -32,4 +32,12 @@ describe('FlashCard', () => {
     render(<FlashCard word={mockWord} onFlipped={() => {}} bgGradient="from-pink-200 to-purple-200" />)
     expect(screen.getByRole('button', { name: /play pronunciation/i })).toBeInTheDocument()
   })
+
+  it('does not call onFlipped on second click after flip', () => {
+    const onFlipped = jest.fn()
+    render(<FlashCard word={mockWord} onFlipped={onFlipped} bgGradient="from-pink-200 to-purple-200" />)
+    fireEvent.click(screen.getByTestId('card-body'))
+    fireEvent.click(screen.getByTestId('card-body'))
+    expect(onFlipped).toHaveBeenCalledTimes(1)
+  })
 })
