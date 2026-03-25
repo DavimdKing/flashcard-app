@@ -60,19 +60,43 @@ export default function FlashCard({ word, onFlipped, bgGradient }: Props) {
 
         {/* Back face */}
         <div
-          className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${bgGradient} flex flex-col items-center justify-center gap-4 p-6 shadow-xl`}
+          className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${bgGradient} flex flex-col items-center justify-center gap-3 p-6 shadow-xl`}
           style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', visibility: isFlipped ? 'visible' : 'hidden' }}
         >
           <div className="absolute top-4 left-4">
             <SoundButton audioUrl={word.audio_url} />
           </div>
-          <h2 className="text-4xl font-bold text-white drop-shadow">{word.thai_translation}</h2>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={word.image_url}
-            alt={word.thai_translation}
-            className={`w-80 h-80 object-contain rounded-2xl ${imgAnimation}`}
-          />
+
+          {/* Thai word */}
+          <h2 className="text-4xl font-bold text-white drop-shadow text-center">{word.thai_translation}</h2>
+
+          {/* Part of speech */}
+          {word.part_of_speech && (
+            <p className="text-sm italic text-blue-200">{word.part_of_speech}</p>
+          )}
+
+          {/* Image or placeholder */}
+          {word.image_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={word.image_url}
+              alt={word.thai_translation}
+              className={`w-80 h-80 object-contain rounded-2xl ${imgAnimation}`}
+            />
+          ) : (
+            <div className={`w-80 h-80 bg-white/10 rounded-2xl ${imgAnimation}`} />
+          )}
+
+          {/* Example sentences */}
+          {word.english_example && (
+            <p className="text-sm italic text-white/90 text-center px-2">{word.english_example}</p>
+          )}
+          {word.english_example && word.thai_example && (
+            <div className="w-10 h-px bg-white/20" />
+          )}
+          {word.thai_example && (
+            <p className="text-sm italic text-white/90 text-center px-2">{word.thai_example}</p>
+          )}
         </div>
       </div>
     </div>
