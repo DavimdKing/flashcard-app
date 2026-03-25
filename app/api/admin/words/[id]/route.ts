@@ -53,7 +53,16 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
 
   const { id } = await params
   const service = createServiceClient()
+
+  // Soft-delete the word
   const { error } = await service.from('words').update({ is_deleted: true }).eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Best-effort cleanup of storage files (all possible extensions)
+  const imageExts = ['jpg', 'png', 'webp']
+  const imagePaths = imageExts.map((ext) => `images/${id}.${ext}`)
+  await service.storage.from('images').remove(imagePaths)
+  await service.storage.from('tts').remove([`tts/${id}.mp3`])
+
   return NextResponse.json({ ok: true })
 }
