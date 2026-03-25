@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 // Tests the route-matching logic (not the full middleware execution)
-import { isPublicRoute, isAdminRoute } from './middleware'
+import { isPublicRoute, isAdminRoute } from './proxy'
 
 describe('route guards', () => {
   it('marks /login as public', () => {
