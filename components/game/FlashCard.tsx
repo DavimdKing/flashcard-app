@@ -71,7 +71,7 @@ export default function FlashCard({ word, onFlipped, bgGradient }: Props) {
           <img
             src={word.image_url}
             alt={word.thai_translation}
-            className={`w-40 h-40 object-contain rounded-2xl ${imgAnimation}`}
+            className={`w-80 h-80 object-contain rounded-2xl ${imgAnimation}`}
           />
         </div>
       </div>
