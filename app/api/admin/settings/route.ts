@@ -23,6 +23,10 @@ export async function PATCH(request: Request) {
   }
 
   const service = createServiceClient()
-  await service.from('site_settings').update({ random_exclusion_days: val }).eq('id', 1)
+  const { error: updateError } = await service
+    .from('site_settings').update({ random_exclusion_days: val }).eq('id', 1)
+  if (updateError) {
+    return NextResponse.json({ error: 'Failed to save settings' }, { status: 500 })
+  }
   return NextResponse.json({ ok: true })
 }

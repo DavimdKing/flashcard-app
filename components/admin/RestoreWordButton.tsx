@@ -2,7 +2,11 @@
 
 export default function RestoreWordButton({ wordId }: { wordId: string }) {
   const handleRestore = async () => {
-    await fetch(`/api/admin/words/${wordId}/restore`, { method: 'POST' })
+    const res = await fetch(`/api/admin/words/${wordId}/restore`, { method: 'POST' })
+    if (!res.ok) {
+      alert('Restore failed')
+      return
+    }
     window.location.reload()
   }
   return (

@@ -16,8 +16,18 @@ export async function POST(request: Request) {
   if (!file || !wordId) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
   if (file.size > 5 * 1024 * 1024) return NextResponse.json({ error: 'File too large' }, { status: 400 })
 
+  const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+    return NextResponse.json({ error: 'Only JPEG, PNG, and WebP images are allowed' }, { status: 400 })
+  }
+
   const buffer = Buffer.from(await file.arrayBuffer())
-  const ext = file.name.split('.').pop() ?? 'jpg'
+  const EXT_MAP: Record<string, string> = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+  }
+  const ext = EXT_MAP[file.type] ?? 'jpg'
   const filePath = `images/${wordId}.${ext}`
 
   const service = createServiceClient()

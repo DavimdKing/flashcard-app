@@ -32,10 +32,12 @@ export async function GET() {
       .select('position, word_id, words(english_word, thai_translation, image_url)')
       .eq('set_id', set.id)
       .order('position')
-    currentWords = (sw ?? []).map((w: any) => ({
-      word_id: w.word_id, position: w.position,
-      english_word: w.words.english_word, thai_translation: w.words.thai_translation,
-    }))
+    currentWords = (sw ?? [])
+      .filter((w: any) => w.words != null)
+      .map((w: any) => ({
+        word_id: w.word_id, position: w.position,
+        english_word: w.words.english_word, thai_translation: w.words.thai_translation,
+      }))
   }
 
   const { data: allWords } = await service
@@ -68,6 +70,19 @@ export async function POST(request: Request) {
   const service = createServiceClient()
   const today = toBangkokDateString()
 
+  // Validate all word_ids are real, non-deleted words
+  const { data: validWords } = await service
+    .from('words')
+    .select('id')
+    .in('id', word_ids)
+    .eq('is_deleted', false)
+
+  const validIds = new Set((validWords ?? []).map(w => w.id))
+  const invalidIds = word_ids.filter((id: string) => !validIds.has(id))
+  if (invalidIds.length > 0) {
+    return NextResponse.json({ error: 'Some word IDs are invalid or deleted' }, { status: 400 })
+  }
+
   const { data: existing } = await service
     .from('daily_sets').select('id, published_at').eq('set_date', today).single()
 
@@ -78,9 +93,12 @@ export async function POST(request: Request) {
   let setId = existing?.id
 
   if (!setId) {
-    const { data: newSet } = await service
+    const { data: newSet, error: insertError } = await service
       .from('daily_sets').insert({ set_date: today }).select('id').single()
-    setId = newSet!.id
+    if (insertError || !newSet) {
+      return NextResponse.json({ error: 'Failed to create set' }, { status: 500 })
+    }
+    setId = newSet.id
   }
 
   if (existing?.published_at && confirm_overwrite) {
