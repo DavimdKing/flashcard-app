@@ -5,8 +5,11 @@ export interface Word {
   id: string
   english_word: string
   thai_translation: string
-  image_url: string
+  image_url: string | null
   audio_url: string | null
+  part_of_speech: string | null
+  english_example: string | null
+  thai_example: string | null
   is_deleted: boolean
   created_at: string
   updated_at: string
@@ -46,8 +49,11 @@ export interface DailySetResponse {
     position: number
     english_word: string
     thai_translation: string
-    image_url: string
+    image_url: string | null
     audio_url: string | null
+    part_of_speech: string | null
+    english_example: string | null
+    thai_example: string | null
   }>
 }
 
