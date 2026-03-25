@@ -63,14 +63,16 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to load words' }, { status: 500 })
   }
 
-  const rows: SetWordRow[] = words.map((w: any) => ({
-    word_id: w.word_id,
-    position: w.position,
-    english_word: w.words.english_word,
-    thai_translation: w.words.thai_translation,
-    image_url: w.words.image_url,
-    audio_url: w.words.audio_url,
-  }))
+  const rows: SetWordRow[] = words
+    .filter((w: any) => w.words != null)
+    .map((w: any) => ({
+      word_id: w.word_id,
+      position: w.position,
+      english_word: w.words.english_word,
+      thai_translation: w.words.thai_translation,
+      image_url: w.words.image_url,
+      audio_url: w.words.audio_url,
+    }))
 
   return NextResponse.json(buildDailySetResponse(set.id, set.set_date, rows))
 }

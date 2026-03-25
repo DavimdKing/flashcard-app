@@ -26,6 +26,16 @@ export async function GET(request: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const { data: appUser } = await supabase
+    .from('users')
+    .select('is_approved')
+    .eq('id', user.id)
+    .single()
+
+  if (!appUser?.is_approved) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
   const { searchParams } = new URL(request.url)
   const setId = searchParams.get('set_id')
   if (!setId) return NextResponse.json({ error: 'Missing set_id' }, { status: 400 })
@@ -58,6 +68,16 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const { data: appUser } = await supabase
+    .from('users')
+    .select('is_approved')
+    .eq('id', user.id)
+    .single()
+
+  if (!appUser?.is_approved) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
   const body = await request.json().catch(() => null)
   if (!validateProgressBody(body)) {
     return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
@@ -75,6 +95,18 @@ export async function POST(request: Request) {
 
   if (!setWord) {
     return NextResponse.json({ error: 'Word not in set' }, { status: 409 })
+  }
+
+  // Verify the set is published
+  const { data: dailySet } = await service
+    .from('daily_sets')
+    .select('id')
+    .eq('id', set_id)
+    .not('published_at', 'is', null)
+    .single()
+
+  if (!dailySet) {
+    return NextResponse.json({ error: 'Set not published' }, { status: 404 })
   }
 
   const { error } = await service
