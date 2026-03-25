@@ -24,7 +24,7 @@ export default function FlashCard({ word, onFlipped, bgGradient }: Props) {
     setTimeout(() => setIgnoreClicks(false), 500)
   }, [isFlipped, ignoreClicks, onFlipped])
 
-  const imgAnimation = isFlipped ? 'animate-bounce' : 'opacity-0'
+  const imgAnimation = isFlipped ? 'animate-bounce [animation-iteration-count:1]' : 'opacity-0'
 
   return (
     <div
