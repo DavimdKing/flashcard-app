@@ -24,7 +24,7 @@ export default function FlashCard({ word, onFlipped, bgGradient }: Props) {
     setTimeout(() => setIgnoreClicks(false), 500)
   }, [isFlipped, ignoreClicks, onFlipped])
 
-  const imgAnimation = isFlipped ? 'animate-bounce [animation-iteration-count:1]' : 'opacity-0'
+  const imgVisible = isFlipped ? '' : 'opacity-0'
 
   return (
     <div
@@ -72,7 +72,7 @@ export default function FlashCard({ word, onFlipped, bgGradient }: Props) {
 
           {/* Part of speech */}
           {word.part_of_speech && (
-            <p className="text-sm italic text-blue-200">{word.part_of_speech}</p>
+            <p className="text-sm font-medium text-white/80 tracking-wide uppercase">{word.part_of_speech}</p>
           )}
 
           {/* Image or placeholder */}
@@ -81,21 +81,21 @@ export default function FlashCard({ word, onFlipped, bgGradient }: Props) {
             <img
               src={word.image_url}
               alt={word.thai_translation}
-              className={`w-80 h-80 object-contain rounded-2xl ${imgAnimation}`}
+              className={`w-80 h-80 object-contain rounded-2xl ${imgVisible}`}
             />
           ) : (
-            <div className={`w-80 h-80 bg-white/10 rounded-2xl ${imgAnimation}`} />
+            <div className={`w-80 h-80 bg-white/10 rounded-2xl ${imgVisible}`} />
           )}
 
           {/* Example sentences */}
           {word.english_example && (
-            <p className="text-sm italic text-white/90 text-center px-2">{word.english_example}</p>
+            <p className="text-sm text-white text-center px-2 leading-relaxed">{word.english_example}</p>
           )}
           {word.english_example && word.thai_example && (
-            <div className="w-10 h-px bg-white/20" />
+            <div className="w-10 h-px bg-white/30" />
           )}
           {word.thai_example && (
-            <p className="text-sm italic text-white/90 text-center px-2">{word.thai_example}</p>
+            <p className="text-sm text-white text-center px-2 leading-relaxed">{word.thai_example}</p>
           )}
         </div>
       </div>
