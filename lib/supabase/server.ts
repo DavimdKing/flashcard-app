@@ -14,7 +14,10 @@ export async function createClient() {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
             )
-          } catch {}
+          } catch {
+            // setAll is called in read-only Server Component contexts where response cookies
+            // cannot be set — safe to ignore this specific error
+          }
         },
       },
     }
