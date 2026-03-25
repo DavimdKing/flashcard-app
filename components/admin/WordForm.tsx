@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Word } from '@/lib/types'
 import { createClient } from '@/lib/supabase/client'
+import { PARTS_OF_SPEECH } from '@/lib/constants'
 
 interface Props {
   word?: Word
@@ -19,6 +20,9 @@ export default function WordForm({ word }: Props) {
   const [saving, setSaving] = useState(false)
   const [audioStatus, setAudioStatus] = useState<'idle' | 'generating' | 'done' | 'error'>('idle')
   const [audioWarning, setAudioWarning] = useState(false)
+  const [partOfSpeech, setPartOfSpeech] = useState<string>(word?.part_of_speech ?? '')
+  const [englishExample, setEnglishExample] = useState(word?.english_example ?? '')
+  const [thaiExample, setThaiExample] = useState(word?.thai_example ?? '')
 
   const supabase = createClient()
 
@@ -57,7 +61,7 @@ export default function WordForm({ word }: Props) {
     const res = await fetch(isEdit ? `/api/admin/words/${wordId}` : '/api/admin/words', {
       method: isEdit ? 'PUT' : 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-      body: JSON.stringify({ id: wordId, english_word: englishWord, thai_translation: thaiTranslation, image_url: imageUrl }),
+      body: JSON.stringify({ id: wordId, english_word: englishWord, thai_translation: thaiTranslation, image_url: imageUrl, part_of_speech: partOfSpeech || null, english_example: englishExample || null, thai_example: thaiExample || null }),
     })
     const json = await res.json()
     if (!res.ok) { setSaving(false); alert('Save failed'); return }
@@ -101,6 +105,42 @@ export default function WordForm({ word }: Props) {
         <span className="text-sm font-medium text-gray-600">Thai Translation *</span>
         <input value={thaiTranslation} onChange={e => setThaiTranslation(e.target.value)} required
           className="border rounded-xl px-3 py-2 text-gray-800 focus:outline-purple-400" />
+      </label>
+
+      <label className="flex flex-col gap-1">
+        <span className="text-sm font-medium text-gray-600">Part of Speech</span>
+        <select
+          value={partOfSpeech}
+          onChange={e => setPartOfSpeech(e.target.value)}
+          className="border rounded-xl px-3 py-2 text-gray-800 focus:outline-purple-400"
+        >
+          <option value="">— optional —</option>
+          {PARTS_OF_SPEECH.map(pos => (
+            <option key={pos} value={pos}>{pos}</option>
+          ))}
+        </select>
+      </label>
+
+      <label className="flex flex-col gap-1">
+        <span className="text-sm font-medium text-gray-600">English Example</span>
+        <textarea
+          value={englishExample}
+          onChange={e => setEnglishExample(e.target.value)}
+          rows={2}
+          placeholder="e.g. The cat sat on the mat."
+          className="border rounded-xl px-3 py-2 text-gray-800 focus:outline-purple-400 resize-none"
+        />
+      </label>
+
+      <label className="flex flex-col gap-1">
+        <span className="text-sm font-medium text-gray-600">Thai Example</span>
+        <textarea
+          value={thaiExample}
+          onChange={e => setThaiExample(e.target.value)}
+          rows={2}
+          placeholder="e.g. แมวนั่งอยู่บนพรม"
+          className="border rounded-xl px-3 py-2 text-gray-800 focus:outline-purple-400 resize-none"
+        />
       </label>
 
       <label className="flex flex-col gap-1">
