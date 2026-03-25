@@ -4,11 +4,11 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
-  const supabase = createClient()
   const [authError, setAuthError] = useState<string | null>(null)
 
   const signIn = async (provider: 'google' | 'facebook') => {
     setAuthError(null)
+    const supabase = createClient()
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: { redirectTo: `${window.location.origin}/api/auth/callback` },
