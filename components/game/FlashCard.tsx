@@ -63,6 +63,9 @@ export default function FlashCard({ word, onFlipped, bgGradient }: Props) {
           className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${bgGradient} flex flex-col items-center justify-center gap-4 p-6 shadow-xl`}
           style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', visibility: isFlipped ? 'visible' : 'hidden' }}
         >
+          <div className="absolute top-4 left-4">
+            <SoundButton audioUrl={word.audio_url} />
+          </div>
           <h2 className="text-4xl font-bold text-white drop-shadow">{word.thai_translation}</h2>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img

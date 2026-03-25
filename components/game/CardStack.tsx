@@ -115,6 +115,7 @@ export default function CardStack({ initialSet, initialProgress }: Props) {
       </div>
 
       <FlashCard
+        key={currentWord.word_id}
         word={currentWord}
         onFlipped={handleFlipped}
         bgGradient={GRADIENTS[currentIdx % GRADIENTS.length]}
