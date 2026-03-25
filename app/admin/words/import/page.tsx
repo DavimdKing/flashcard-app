@@ -144,23 +144,26 @@ export default function ImportPage() {
 
   const handleSave = async () => {
     setSaving(true)
-    const { data: { session } } = await supabase.auth.getSession()
-    const res = await fetch('/api/admin/words/bulk-import', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-      body: JSON.stringify({
-        words: validRows.map(r => ({
-          english_word: r.english_word,
-          thai_translation: r.thai_translation,
-          part_of_speech: r.part_of_speech,
-          english_example: r.english_example,
-          thai_example: r.thai_example,
-        })),
-      }),
-    })
-    const result = await res.json()
-    setSaveResult(result)
-    setSaving(false)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin/words/bulk-import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+        body: JSON.stringify({
+          words: validRows.map(r => ({
+            english_word: r.english_word,
+            thai_translation: r.thai_translation,
+            part_of_speech: r.part_of_speech,
+            english_example: r.english_example,
+            thai_example: r.thai_example,
+          })),
+        }),
+      })
+      const result = await res.json()
+      setSaveResult(result)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const STATUS_BADGE: Record<string, string> = {

@@ -28,7 +28,7 @@ export default async function PlayPage() {
 
   const { data: wordRows } = await service
     .from('daily_set_words')
-    .select('word_id, position, words(english_word, thai_translation, image_url, audio_url)')
+    .select('word_id, position, words(english_word, thai_translation, image_url, audio_url, part_of_speech, english_example, thai_example)')
     .eq('set_id', set.id)
 
   const words = (wordRows ?? [])
