@@ -1,0 +1,127 @@
+<h2>Excel Import — Preview Screen</h2>
+<p class="subtitle">After uploading the Excel file, admin sees this before confirming save</p>
+
+<div style="font-family:sans-serif; max-width:860px; margin:0 auto;">
+
+  <!-- Upload zone (collapsed after file chosen) -->
+  <div style="background:rgba(255,255,255,0.06); border:2px dashed rgba(255,255,255,0.2); border-radius:12px; padding:16px 20px; display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+    <span style="font-size:20px;">📄</span>
+    <div style="flex:1;">
+      <div style="color:#e0f0ff; font-size:13px; font-weight:600;">vocabulary_batch_01.xlsx</div>
+      <div style="color:#a0c4ff; font-size:11px;">8 rows detected</div>
+    </div>
+    <button style="background:rgba(255,255,255,0.1); color:#e0f0ff; border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:6px 14px; font-size:12px; cursor:pointer;">Change file</button>
+  </div>
+
+  <!-- Summary bar -->
+  <div style="display:flex; gap:12px; margin-bottom:16px;">
+    <div style="background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.4); border-radius:8px; padding:8px 16px; font-size:12px; color:#86efac;">
+      ✓ 6 ready to import
+    </div>
+    <div style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); border-radius:8px; padding:8px 16px; font-size:12px; color:#fca5a5;">
+      ✗ 2 have errors
+    </div>
+  </div>
+
+  <!-- Preview table -->
+  <div style="background:rgba(255,255,255,0.04); border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.1); margin-bottom:20px;">
+    <table style="width:100%; border-collapse:collapse; font-size:12px;">
+      <thead>
+        <tr style="background:rgba(255,255,255,0.08); color:#a0c4ff; text-align:left;">
+          <th style="padding:10px 14px;">#</th>
+          <th style="padding:10px 14px;">Vocabulary</th>
+          <th style="padding:10px 14px;">POS</th>
+          <th style="padding:10px 14px;">Thai Meaning</th>
+          <th style="padding:10px 14px;">English Example</th>
+          <th style="padding:10px 14px;">Thai Example</th>
+          <th style="padding:10px 14px;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-top:1px solid rgba(255,255,255,0.06); color:#e0f0ff;">
+          <td style="padding:10px 14px; color:#a0c4ff;">1</td>
+          <td style="padding:10px 14px; font-weight:600;">cat</td>
+          <td style="padding:10px 14px;">noun</td>
+          <td style="padding:10px 14px;">แมว</td>
+          <td style="padding:10px 14px; color:#c0d8f0; font-style:italic;">The cat sat on the mat.</td>
+          <td style="padding:10px 14px; color:#c0d8f0; font-style:italic;">แมวนั่งบนพรม</td>
+          <td style="padding:10px 14px;"><span style="background:rgba(34,197,94,0.2); color:#86efac; padding:2px 8px; border-radius:10px; font-size:11px;">✓ Ready</span></td>
+        </tr>
+        <tr style="border-top:1px solid rgba(255,255,255,0.06); color:#e0f0ff;">
+          <td style="padding:10px 14px; color:#a0c4ff;">2</td>
+          <td style="padding:10px 14px; font-weight:600;">run</td>
+          <td style="padding:10px 14px;">verb</td>
+          <td style="padding:10px 14px;">วิ่ง</td>
+          <td style="padding:10px 14px; color:#c0d8f0; font-style:italic;">She runs every morning.</td>
+          <td style="padding:10px 14px; color:#c0d8f0; font-style:italic;">เธอวิ่งทุกเช้า</td>
+          <td style="padding:10px 14px;"><span style="background:rgba(34,197,94,0.2); color:#86efac; padding:2px 8px; border-radius:10px; font-size:11px;">✓ Ready</span></td>
+        </tr>
+        <tr style="border-top:1px solid rgba(255,255,255,0.06); color:#e0f0ff;">
+          <td style="padding:10px 14px; color:#a0c4ff;">3</td>
+          <td style="padding:10px 14px; font-weight:600;">happy</td>
+          <td style="padding:10px 14px;">adjective</td>
+          <td style="padding:10px 14px;">มีความสุข</td>
+          <td style="padding:10px 14px; color:#c0d8f0; font-style:italic;">She feels happy today.</td>
+          <td style="padding:10px 14px; color:#c0d8f0; font-style:italic;">เธอรู้สึกมีความสุขวันนี้</td>
+          <td style="padding:10px 14px;"><span style="background:rgba(34,197,94,0.2); color:#86efac; padding:2px 8px; border-radius:10px; font-size:11px;">✓ Ready</span></td>
+        </tr>
+        <!-- Error row -->
+        <tr style="border-top:1px solid rgba(255,255,255,0.06); background:rgba(239,68,68,0.07);">
+          <td style="padding:10px 14px; color:#a0c4ff;">4</td>
+          <td style="padding:10px 14px; font-weight:600; color:#fca5a5;">quickly</td>
+          <td style="padding:10px 14px; color:#fca5a5;">adverb</td>
+          <td style="padding:10px 14px; color:#fca5a5; font-style:italic;">— missing —</td>
+          <td style="padding:10px 14px; color:#c0d8f0; font-style:italic;">He ran quickly.</td>
+          <td style="padding:10px 14px; color:#c0d8f0; font-style:italic;">เขาวิ่งอย่างรวดเร็ว</td>
+          <td style="padding:10px 14px;"><span style="background:rgba(239,68,68,0.2); color:#fca5a5; padding:2px 8px; border-radius:10px; font-size:11px;">✗ Missing Thai</span></td>
+        </tr>
+        <tr style="border-top:1px solid rgba(255,255,255,0.06); color:#e0f0ff;">
+          <td style="padding:10px 14px; color:#a0c4ff;">5</td>
+          <td style="padding:10px 14px; font-weight:600;">book</td>
+          <td style="padding:10px 14px;">noun</td>
+          <td style="padding:10px 14px;">หนังสือ</td>
+          <td style="padding:10px 14px; color:#c0d8f0; font-style:italic;">I read a book.</td>
+          <td style="padding:10px 14px; color:#c0d8f0; font-style:italic;">ฉันอ่านหนังสือ</td>
+          <td style="padding:10px 14px;"><span style="background:rgba(34,197,94,0.2); color:#86efac; padding:2px 8px; border-radius:10px; font-size:11px;">✓ Ready</span></td>
+        </tr>
+        <!-- Duplicate error row -->
+        <tr style="border-top:1px solid rgba(255,255,255,0.06); background:rgba(239,68,68,0.07);">
+          <td style="padding:10px 14px; color:#a0c4ff;">6</td>
+          <td style="padding:10px 14px; font-weight:600; color:#fca5a5;">cat</td>
+          <td style="padding:10px 14px; color:#fca5a5;">noun</td>
+          <td style="padding:10px 14px; color:#fca5a5;">แมว</td>
+          <td style="padding:10px 14px; color:#c0d8f0; font-style:italic;">A cat has nine lives.</td>
+          <td style="padding:10px 14px; color:#c0d8f0; font-style:italic;">แมวมีชีวิตเก้าชีวิต</td>
+          <td style="padding:10px 14px;"><span style="background:rgba(239,68,68,0.2); color:#fca5a5; padding:2px 8px; border-radius:10px; font-size:11px;">✗ Duplicate word</span></td>
+        </tr>
+        <tr style="border-top:1px solid rgba(255,255,255,0.06); color:#e0f0ff;">
+          <td style="padding:10px 14px; color:#a0c4ff;">7</td>
+          <td style="padding:10px 14px; font-weight:600;">water</td>
+          <td style="padding:10px 14px;">noun</td>
+          <td style="padding:10px 14px;">น้ำ</td>
+          <td style="padding:10px 14px; color:#c0d8f0; font-style:italic;">Drink more water.</td>
+          <td style="padding:10px 14px; color:#c0d8f0; font-style:italic;">ดื่มน้ำมากขึ้น</td>
+          <td style="padding:10px 14px;"><span style="background:rgba(34,197,94,0.2); color:#86efac; padding:2px 8px; border-radius:10px; font-size:11px;">✓ Ready</span></td>
+        </tr>
+        <tr style="border-top:1px solid rgba(255,255,255,0.06); color:#e0f0ff;">
+          <td style="padding:10px 14px; color:#a0c4ff;">8</td>
+          <td style="padding:10px 14px; font-weight:600;">sleep</td>
+          <td style="padding:10px 14px;">verb</td>
+          <td style="padding:10px 14px;">นอนหลับ</td>
+          <td style="padding:10px 14px; color:#c0d8f0; font-style:italic;">I sleep 8 hours a night.</td>
+          <td style="padding:10px 14px; color:#c0d8f0; font-style:italic;">ฉันนอนหลับ 8 ชั่วโมงต่อคืน</td>
+          <td style="padding:10px 14px;"><span style="background:rgba(34,197,94,0.2); color:#86efac; padding:2px 8px; border-radius:10px; font-size:11px;">✓ Ready</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Action buttons -->
+  <div style="display:flex; gap:12px; justify-content:flex-end;">
+    <button style="background:transparent; color:#a0c4ff; border:1px solid rgba(255,255,255,0.2); border-radius:10px; padding:10px 20px; font-size:13px; cursor:pointer;">Cancel</button>
+    <button style="background:linear-gradient(135deg,#2563eb,#1d4ed8); color:white; border:none; border-radius:10px; padding:10px 24px; font-size:13px; font-weight:600; cursor:pointer;">Save 6 valid words →</button>
+  </div>
+
+  <p style="color:#6b88a8; font-size:11px; text-align:right; margin-top:8px;">Rows with errors are skipped. Fix them in Excel and re-upload to add them.</p>
+
+</div>

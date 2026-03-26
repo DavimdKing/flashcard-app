@@ -1,0 +1,76 @@
+<h2>Flashcard Back Face — Layout Options</h2>
+<p class="subtitle">Where should Part of Speech + Example sentences appear on the Thai answer side?</p>
+
+<div class="cards">
+
+  <!-- Option A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: linear-gradient(135deg, #1e3a5f 0%, #2d6a9f 100%); padding: 16px; border-radius: 8px; font-family: sans-serif;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="background:rgba(255,255,255,0.2); color:#fff; font-size:11px; padding:2px 8px; border-radius:12px;">🔊</span>
+        <span style="background:rgba(255,255,255,0.2); color:#cce0ff; font-size:10px; padding:2px 8px; border-radius:12px; font-style:italic;">noun</span>
+      </div>
+      <div style="text-align:center; color:white; font-size:22px; font-weight:bold; margin-bottom:10px;">แมว</div>
+      <div style="text-align:center; margin-bottom:10px;">
+        <div style="width:80px; height:80px; background:rgba(255,255,255,0.15); border-radius:8px; margin:0 auto; display:flex; align-items:center; justify-content:center; font-size:32px;">🐱</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.25); border-radius:8px; padding:10px; font-size:11px; color:#e0f0ff;">
+        <div style="margin-bottom:4px;">🇬🇧 <em>The cat sat on the mat.</em></div>
+        <div>🇹🇭 <em>แมวนั่งอยู่บนพรม</em></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Option A — Compact inline</h3>
+      <p>Part of speech badge next to the sound button. Example box below the image, compact style.</p>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: linear-gradient(135deg, #1e3a5f 0%, #2d6a9f 100%); padding: 16px; border-radius: 8px; font-family: sans-serif;">
+      <div style="display:flex; justify-content:flex-start; margin-bottom:4px;">
+        <span style="background:rgba(255,255,255,0.2); color:#fff; font-size:11px; padding:2px 8px; border-radius:12px;">🔊</span>
+      </div>
+      <div style="text-align:center; color:white; font-size:22px; font-weight:bold; margin-bottom:6px;">แมว</div>
+      <div style="text-align:center; margin-bottom:6px; font-style:italic; color:#a0c4ff; font-size:11px;">noun</div>
+      <div style="text-align:center; margin-bottom:10px;">
+        <div style="width:80px; height:80px; background:rgba(255,255,255,0.15); border-radius:8px; margin:0 auto; display:flex; align-items:center; justify-content:center; font-size:32px;">🐱</div>
+      </div>
+      <div style="font-size:11px; color:#e0f0ff;">
+        <div style="border-left:2px solid rgba(255,255,255,0.3); padding-left:8px; margin-bottom:6px;"><span style="color:#a0c4ff; font-size:10px; display:block;">EN</span><em>The cat sat on the mat.</em></div>
+        <div style="border-left:2px solid rgba(255,255,255,0.3); padding-left:8px;"><span style="color:#a0c4ff; font-size:10px; display:block;">TH</span><em>แมวนั่งอยู่บนพรม</em></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Option B — Stacked with dividers</h3>
+      <p>Part of speech centered below Thai word. Examples separated by left-border dividers, more spacious.</p>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: linear-gradient(135deg, #1e3a5f 0%, #2d6a9f 100%); padding: 16px; border-radius: 8px; font-family: sans-serif;">
+      <div style="display:flex; justify-content:flex-start; margin-bottom:8px;">
+        <span style="background:rgba(255,255,255,0.2); color:#fff; font-size:11px; padding:2px 8px; border-radius:12px;">🔊</span>
+      </div>
+      <div style="display:flex; gap:10px; align-items:flex-start;">
+        <div style="flex:1;">
+          <div style="color:white; font-size:20px; font-weight:bold; margin-bottom:4px;">แมว</div>
+          <div style="color:#a0c4ff; font-size:11px; font-style:italic; margin-bottom:8px;">noun</div>
+          <div style="font-size:10px; color:#e0f0ff; line-height:1.5;">
+            <div style="margin-bottom:4px;"><span style="opacity:0.6">EN:</span> <em>The cat sat on the mat.</em></div>
+            <div><span style="opacity:0.6">TH:</span> <em>แมวนั่งอยู่บนพรม</em></div>
+          </div>
+        </div>
+        <div style="width:80px; height:80px; background:rgba(255,255,255,0.15); border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:32px;">🐱</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Option C — Side by side</h3>
+      <p>Text (word + POS + examples) on the left, image on the right. More horizontal use of space.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px;">Click a layout to select it, then let me know in the terminal.</p>
