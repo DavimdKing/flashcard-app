@@ -1,7 +1,7 @@
 // components/dashboard/StatCard.tsx
 interface Props {
-  label: string
-  value: string
+  label?: string
+  value?: string
   valueColor?: string
   placeholder?: boolean
 }
