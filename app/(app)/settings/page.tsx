@@ -18,7 +18,7 @@ export default function SettingsPage() {
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return
+      if (!user) { router.replace('/login'); return }
       setUser({
         displayName: user.user_metadata?.full_name ?? user.email ?? 'User',
         email: user.email ?? '',
