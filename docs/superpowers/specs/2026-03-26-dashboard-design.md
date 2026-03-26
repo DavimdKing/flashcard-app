@@ -26,7 +26,7 @@ A fixed purple sidebar on the left, always visible. Contains:
   - 🏠 Dashboard (active state: white semi-transparent background)
   - 🎮 Play Game
   - ⚙️ Settings
-- User avatar + display name pinned to the bottom of the sidebar
+- User avatar (`user.user_metadata.avatar_url`) + display name (`user.user_metadata.full_name`) pinned to the bottom of the sidebar
 
 Active link is highlighted with a white semi-transparent pill background. Inactive links are white at 70% opacity.
 
@@ -38,11 +38,11 @@ Sidebar is hidden. A fixed purple tab bar appears at the bottom of the screen wi
 - 🎮 Play
 - ⚙️ Settings
 
-Active tab is full white; inactive tabs are white at 55% opacity. The tab bar never scrolls away.
+Active tab is full white; inactive tabs are white at 55% opacity. The tab bar is `position: fixed; bottom: 0` — it overlaps content. The content area has `pb-16` so nothing is hidden behind the tab bar.
 
 ### Extensibility
 
-The nav items are defined in a single array in the layout component so adding a new page (e.g. a second game, a leaderboard) requires only adding one entry to that array — no structural changes needed.
+The nav items are defined in a single array in `AppNav.tsx`. Adding a new page requires only adding one entry to that array — no structural changes needed.
 
 ---
 
@@ -52,85 +52,120 @@ The nav items are defined in a single array in the layout component so adding a 
 |---|---|---|
 | `/` | Redirect to `/play` | Redirect to `/dashboard` |
 | `/dashboard` | Does not exist | New dashboard page |
-| `/play` | Main game page | Same — unchanged |
-| `/settings` | Does not exist | New settings/profile page |
-| `/(game)/layout.tsx` | Header with user menu only | Replaced by new nav shell layout |
+| `/play` | Lives in `(game)` group | Moved to `(app)` group, unchanged |
+| `/no-set` | Lives in `(game)` group | Moved to `(app)` group, unchanged |
+| `/access-denied` | Lives in `(game)` group | Stays public — move to `(auth)` group (no nav shell) |
+| `/settings` | Does not exist | New settings/profile page in `(app)` group |
 
-The existing `(game)` route group layout is replaced by a new `(app)` route group that wraps `/dashboard`, `/play`, and `/settings` with the shared nav shell. The `UserMenu` component in the old header is removed — the user identity moves to the sidebar bottom.
+The existing `(game)` route group is replaced by a new `(app)` route group. `/dashboard`, `/play`, `/no-set`, and `/settings` all live inside `(app)` and share the nav shell layout.
+
+`/access-denied` is a public page (listed as a public path in `proxy.ts`). It moves to the `(auth)` route group alongside `/login`, with no nav shell.
 
 The admin routes (`/admin/*`) keep their own separate layout and are unaffected.
+
+### Auth Guard in `(app)/layout.tsx`
+
+The `(app)/layout.tsx` server component is responsible for:
+1. Calling `supabase.auth.getUser()` to get the current user
+2. Redirecting to `/login` if unauthenticated
+3. Passing `user.user_metadata.full_name` and `user.user_metadata.avatar_url` to the sidebar/bottom bar components
+
+It does **not** re-check `is_approved` — that is already enforced by `proxy.ts` before the request reaches the layout. The layout can trust that any user who reaches it is authenticated and approved.
+
+The existing `UserMenu` component (currently in the `(game)` layout header) is removed. Its sign-out functionality moves to the Settings page.
 
 ---
 
 ## Dashboard Page (`/dashboard`)
 
-### Data
+### Score Data Query
 
-Fetched server-side using the service client:
+Fetched server-side using the service client. Because the Supabase JS query builder does not support `COUNT ... FILTER`, use a raw SQL query via `supabase.rpc()` or `supabase.from(...).select()` with a computed column. The recommended approach is a raw SQL query using `rpc`:
 
-1. **Last 7 sessions** — query `user_progress` joined to `daily_sets`, grouped by `set_id`, ordered by `daily_sets.set_date DESC`, limit 7 sessions where the user has at least one progress row.
-2. **Per-session score** — for each session: `COUNT(*) FILTER (WHERE result = 'got_it') / COUNT(*) * 100`, rounded to nearest integer.
-3. **7-day average** — mean of the 7 session scores (or fewer if user has played fewer than 7 games).
-4. **Best score** — max of the 7 session scores.
-
-If the user has never played, the chart area shows a friendly empty state: *"Play your first set to see your scores here."*
-
-### Layout
-
+```sql
+-- Supabase RPC function: get_user_recent_scores(p_user_id uuid, p_limit int)
+SELECT
+  ds.set_date,
+  ROUND(
+    COUNT(*) FILTER (WHERE up.result = 'got_it') * 100.0 / COUNT(*)
+  )::int AS score_pct
+FROM user_progress up
+JOIN daily_sets ds ON ds.id = up.set_id
+WHERE up.user_id = p_user_id
+GROUP BY ds.set_date, up.set_id
+ORDER BY ds.set_date DESC
+LIMIT p_limit;
 ```
-┌─────────────────────────────────────────────┐
-│ Good morning, [Name] 👋    [▶ Play Today's Set] │
-├─────────────────────────────────────────────┤
-│                                             │
-│  Last 7 Games                               │
-│                                             │
-│  95%  75%  55%  25%  78%  92%  60%         │
-│  ██   ▓▓   ▒▒   ░░   ▓▓   ██   ▒▒          │
-│  Mon  Tue  Wed  Thu  Fri  Sat  Sun          │
-│                                             │
-├──────────────┬──────────────┬───────────────┤
-│ 7-day avg    │ Best score   │ (dashed box)  │
-│ 69%          │ 95%          │ Coming soon   │
-└──────────────┴──────────────┴───────────────┘
+
+This RPC function must be created in Supabase (SQL Editor) as a migration step. It returns rows of `{ set_date: string, score_pct: number }`, newest first.
+
+The dashboard fetches with `limit = 7`. The result is reversed before rendering so the oldest session appears on the left (chronological order).
+
+If the user has never played, the query returns an empty array — show the empty state.
+
+### Dashboard Layout
+
+**Desktop:**
 ```
+┌──────────────────────────────────────────────────────┐
+│ Good morning, [Name] 👋         [▶ Play Today's Set] │
+├──────────────────────────────────────────────────────┤
+│  Last 7 Games                                        │
+│                                                      │
+│  95%  75%  55%  25%  78%  92%  60%                  │
+│  ████  ███  ██   █   ███  ████  ██                   │
+│  Mon  Tue  Wed  Thu  Fri  Sat  Sun                   │
+├──────────────┬───────────────┬───────────────────────┤
+│ Recent avg   │ Best score    │ ╌ Coming soon ╌       │
+│ 69%          │ 95%           │                       │
+└──────────────┴───────────────┴───────────────────────┘
+```
+
+**Mobile:** greeting and "Play Today's Set" button stack vertically (greeting on top, full-width button below). Chart and stat cards below, full width.
 
 ### Score Bar Colors
 
-| Score | Color | Tailwind |
+| Score | Color | Tailwind class |
 |---|---|---|
-| 90–100% | Solid green | `bg-green-600` (#16a34a) |
-| 70–89% | Light green | `bg-green-300` (#86efac) |
-| 40–69% | Yellow | `bg-amber-400` (#fbbf24) |
-| 0–39% | Red | `bg-red-500` (#ef4444) |
+| 90–100% | Solid green | `bg-green-600` |
+| 70–89% | Light green | `bg-green-300` |
+| 40–69% | Yellow | `bg-amber-400` |
+| 0–39% | Red | `bg-red-500` |
 
-Bar height is proportional to score (score% of max bar height). Score percentage shown above each bar. Day label (Mon/Tue/… or M/T/… on mobile) shown below.
-
-No legend is shown — the colors are intuitive enough on their own.
+Bar height: max bar height is `120px`. Each bar's height = `Math.round(score_pct / 100 * 120)px`. Score percentage shown above each bar. Day label (`Mon`/`Tue`/… on desktop, `M`/`T`/… on mobile) derived from `set_date` using `toLocaleDateString('en-US', { weekday: 'short' })` — shown below the bar. No legend.
 
 ### Stat Cards (bottom row)
 
-- **7-day avg** — purple value
-- **Best score** — green value
-- **Placeholder** — dashed border, greyed out, "Coming soon" text. Reserved for a future feature (e.g. streak, total words learned).
+- **Recent avg** — average of the scores returned (not "7-day avg" since the user may have fewer than 7 sessions). Value in purple.
+- **Best score** — max of the scores returned. Value in green.
+- **Placeholder** — dashed border, greyed out, "Coming soon" text. For future features.
 
 ### "Play Today's Set" Button
 
-- Top-right on desktop, below the greeting on mobile
-- Links to `/play`
-- If no set has been published today (admin hasn't published), button still shows but `/play` will display the existing "No new cards today" screen
+Always shown. Links to `/play`. The dashboard does **not** query `daily_sets` to check if today's set exists — `/play` handles that and redirects to `/no-set` if needed.
+
+### Empty State
+
+If the user has 0 sessions: replace the chart area with a centered message:
+> *"Play your first set to see your scores here."*
+
+Stat cards are hidden when there is no data.
 
 ---
 
 ## Settings Page (`/settings`)
 
-A simple profile page. For v1, shows:
+Data comes from `supabase.auth.getUser()` — the `user` object returned by the Supabase auth client. All fields are read-only in v1.
 
-- User avatar (from Google OAuth profile photo)
-- Display name (from Google account)
-- Email address (read-only)
-- Sign out button
+| Field | Source |
+|---|---|
+| Avatar photo | `user.user_metadata.avatar_url` (Google profile photo URL) |
+| Display name | `user.user_metadata.full_name` |
+| Email | `user.email` |
 
-No editable fields in v1. Space is reserved for future preferences (notification settings, language options, etc.).
+**Sign out:** Call `supabase.auth.signOut()` (client-side), then redirect to `/login`. This replaces the sign-out behaviour previously in `UserMenu`.
+
+No editable fields in v1. Space reserved for future preferences.
 
 ---
 
@@ -139,34 +174,39 @@ No editable fields in v1. Space is reserved for future preferences (notification
 ```
 app/
   (app)/
-    layout.tsx          — Nav shell: sidebar (desktop) + bottom tab bar (mobile)
+    layout.tsx          — Nav shell: fetches user, renders AppSidebar + AppBottomBar
     dashboard/
-      page.tsx          — Dashboard (server component, fetches score data)
+      page.tsx          — Server component; calls RPC, passes data to ScoreChart
     play/
-      page.tsx          — Existing game (moved from (game) group)
+      page.tsx          — Existing game (moved from (game) group, no changes)
+    no-set/
+      page.tsx          — Existing no-set page (moved, no changes)
     settings/
-      page.tsx          — Profile/settings page
+      page.tsx          — Client component; calls supabase.auth.getUser()
   (auth)/
     login/page.tsx      — Unchanged
+    access-denied/
+      page.tsx          — Moved from (game), no nav shell
   admin/
-    layout.tsx          — Unchanged (separate nav)
+    layout.tsx          — Unchanged
   page.tsx              — Redirect: / → /dashboard
 
 components/
   app/
-    AppNav.tsx          — Nav items array + active link logic (shared by sidebar + bottom bar)
-    AppSidebar.tsx      — Desktop sidebar (uses AppNav)
-    AppBottomBar.tsx    — Mobile bottom tab bar (uses AppNav)
+    AppNav.tsx          — NAV_ITEMS array + scoreColor helper re-export; shared by sidebar + bottom bar
+    AppSidebar.tsx      — Desktop sidebar; renders AppNav items + user avatar/name
+    AppBottomBar.tsx    — Mobile bottom tab bar; renders AppNav items
   dashboard/
-    ScoreChart.tsx      — Bar chart component (pure, receives score data as props)
-    StatCard.tsx        — Individual stat card (label + value + optional color)
+    ScoreChart.tsx      — Pure component; receives ScoreEntry[] props; renders bars
+    StatCard.tsx        — Single stat card (label, value, color variant)
+
+lib/
+  score-color.ts        — Pure helper: scoreColor(pct: number): string
 ```
 
 ---
 
-## Score Color Logic
-
-Centralised in a pure helper function (no component coupling):
+## Score Color Helper
 
 ```typescript
 // lib/score-color.ts
@@ -180,14 +220,43 @@ export function scoreColor(pct: number): string {
 
 ---
 
+## Database: New RPC Function
+
+A new Supabase migration creates the RPC function:
+
+```sql
+-- supabase/migrations/004_get_user_recent_scores.sql
+CREATE OR REPLACE FUNCTION get_user_recent_scores(p_user_id uuid, p_limit int)
+RETURNS TABLE(set_date date, score_pct int)
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT
+    ds.set_date,
+    ROUND(
+      COUNT(*) FILTER (WHERE up.result = 'got_it') * 100.0 / COUNT(*)
+    )::int AS score_pct
+  FROM user_progress up
+  JOIN daily_sets ds ON ds.id = up.set_id
+  WHERE up.user_id = p_user_id
+  GROUP BY ds.set_date, up.set_id
+  ORDER BY ds.set_date DESC
+  LIMIT p_limit;
+$$;
+```
+
+This function must be run in Supabase SQL Editor before the dashboard page will work.
+
+---
+
 ## Responsive Behaviour
 
-| Breakpoint | Sidebar | Bottom bar | Chart day labels |
-|---|---|---|---|
-| ≥ 768px (md) | Visible (110px wide) | Hidden | Full name (Mon, Tue…) |
-| < 768px | Hidden | Visible (fixed bottom) | Single letter (M, T…) |
+| Breakpoint | Sidebar | Bottom bar | Chart labels | Button |
+|---|---|---|---|---|
+| ≥ 768px (md) | Visible, 110px wide | Hidden | Mon/Tue/… | Top-right |
+| < 768px | Hidden | Fixed bottom, full width | M/T/… | Full-width below greeting |
 
-The main content area fills 100% width minus the sidebar on desktop, and 100% width on mobile (bottom bar does not reduce content height — it overlaps, so content has `pb-16` padding to avoid being hidden behind it).
+Content area: `md:ml-[110px]` on desktop to offset sidebar. `pb-16` on mobile to clear the bottom tab bar.
 
 ---
 
@@ -195,10 +264,11 @@ The main content area fills 100% width minus the sidebar on desktop, and 100% wi
 
 | Situation | Behaviour |
 |---|---|
-| User has 0 games played | Chart area shows empty state message |
-| User has 1–6 games played | Chart shows only the bars that exist (no placeholder bars) |
-| No daily set published today | "Play Today's Set" button still shown; clicking goes to `/play` which shows the existing no-set screen |
-| Score data fetch fails | Dashboard shows error message; other parts of page still render |
+| User has 0 games played | Chart replaced by empty state message; stat cards hidden |
+| User has 1–6 games played | Only bars for actual sessions shown |
+| No daily set published today | Button shown; `/play` redirects to `/no-set` |
+| RPC fetch fails | Chart area shows error message; rest of page renders |
+| `avatar_url` is null | Show a default avatar (user's initials in a coloured circle) |
 
 ---
 
