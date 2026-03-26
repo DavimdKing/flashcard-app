@@ -53,7 +53,7 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isAdminRoute(pathname) && !appUser?.is_admin) {
-    return NextResponse.redirect(new URL('/play', request.url))
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   return response
