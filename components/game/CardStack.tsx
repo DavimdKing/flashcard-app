@@ -104,6 +104,7 @@ export default function CardStack({ initialSet, initialProgress, mode = 'daily',
   }
 
   const handlePlayAgain = () => {
+    completedRef.current = false
     setCurrentIdx(0)
     setResults([])
     setShowGradeBar(false)
