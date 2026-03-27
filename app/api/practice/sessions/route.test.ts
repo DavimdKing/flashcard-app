@@ -40,12 +40,21 @@ describe('POST /api/practice/sessions', () => {
     expect(res.status).toBe(403)
   })
 
-  it('returns 400 for invalid score_pct', async () => {
+  it('returns 400 for invalid UUID group_id', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } })
     mockFrom.mockReturnValue({
       select: () => ({ eq: () => ({ single: () => ({ data: { is_approved: true } }) }) }),
     })
-    const res = await POST(makeRequest({ group_id: 'a'.repeat(36), score_pct: 150 }))
+    const res = await POST(makeRequest({ group_id: 'not-a-uuid', score_pct: 80 }))
+    expect(res.status).toBe(400)
+  })
+
+  it('returns 400 for out-of-range score_pct', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } })
+    mockFrom.mockReturnValue({
+      select: () => ({ eq: () => ({ single: () => ({ data: { is_approved: true } }) }) }),
+    })
+    const res = await POST(makeRequest({ group_id: '00000000-0000-0000-0000-000000000000', score_pct: 150 }))
     expect(res.status).toBe(400)
   })
 })
