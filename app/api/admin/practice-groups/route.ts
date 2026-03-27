@@ -40,7 +40,11 @@ export async function POST(request: Request) {
       p_is_active: !!is_active,
       p_word_ids: word_ids,
     })
-    if (rpcError) return NextResponse.json({ error: 'Failed to save words' }, { status: 500 })
+    if (rpcError) {
+      // Clean up the orphaned group row before returning error
+      await service.from('practice_groups').delete().eq('id', group.id)
+      return NextResponse.json({ error: 'Failed to save words' }, { status: 500 })
+    }
   }
 
   return NextResponse.json({ id: group.id }, { status: 201 })

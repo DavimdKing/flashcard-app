@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import WordPicker from '@/components/admin/WordPicker'
 
@@ -18,6 +18,12 @@ export default function PracticeGroupEditForm({ group, initialWords }: { group: 
   const [error, setError] = useState('')
 
   const canActivate = words.length === 20
+
+  useEffect(() => {
+    if (words.length < 20 && isActive) {
+      setIsActive(false)
+    }
+  }, [words.length, isActive])
 
   const handleSave = async () => {
     setError('')
@@ -43,9 +49,20 @@ export default function PracticeGroupEditForm({ group, initialWords }: { group: 
   const handleDelete = async () => {
     if (!confirm(`Delete "${name}"? This cannot be undone.`)) return
     setDeleting(true)
-    await fetch(`/api/admin/practice-groups/${group.id}`, { method: 'DELETE' })
-    router.push('/admin/practice-groups')
-    router.refresh()
+    try {
+      const res = await fetch(`/api/admin/practice-groups/${group.id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setError(data.error ?? 'Failed to delete')
+        return
+      }
+      router.push('/admin/practice-groups')
+      router.refresh()
+    } catch {
+      setError('Failed to delete')
+    } finally {
+      setDeleting(false)
+    }
   }
 
   return (

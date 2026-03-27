@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import WordPicker from '@/components/admin/WordPicker'
 
@@ -16,6 +16,12 @@ export default function NewPracticeGroupPage() {
   const [error, setError] = useState('')
 
   const canActivate = words.length === 20
+
+  useEffect(() => {
+    if (words.length < 20 && isActive) {
+      setIsActive(false)
+    }
+  }, [words.length, isActive])
 
   const handleSave = async () => {
     setError('')
