@@ -23,9 +23,11 @@ const GRADIENTS = [
 interface Props {
   initialSet: DailySetResponse
   initialProgress: ProgressResult[]
+  mode?: 'daily' | 'practice'
+  onSessionComplete?: (scorePct: number) => void
 }
 
-export default function CardStack({ initialSet, initialProgress }: Props) {
+export default function CardStack({ initialSet, initialProgress, mode = 'daily', onSessionComplete }: Props) {
   const { words, set_id } = initialSet
   const total = words.length
 
@@ -40,6 +42,7 @@ export default function CardStack({ initialSet, initialProgress }: Props) {
   const [saving, setSaving] = useState(false)
   const [preloading, setPreloading] = useState(true)
   const gradeBarTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const completedRef = useRef(false)
 
   // Preload all images and audio before showing first card (8-second timeout)
   useEffect(() => {
@@ -63,6 +66,14 @@ export default function CardStack({ initialSet, initialProgress }: Props) {
     }
   }, [])
 
+  useEffect(() => {
+    if (mode !== 'practice' || currentIdx < total || completedRef.current) return
+    completedRef.current = true
+    const gotItCount = results.filter(r => r.result === 'got_it').length
+    const scorePct = Math.round(gotItCount / total * 100)
+    onSessionComplete?.(scorePct)
+  }, [currentIdx, total, mode, results, onSessionComplete])
+
   const currentWord = words[currentIdx]
 
   const handleFlipped = useCallback(() => {
@@ -73,13 +84,15 @@ export default function CardStack({ initialSet, initialProgress }: Props) {
     if (saving || !currentWord) return
     setSaving(true)
     try {
-      const response = await fetch('/api/progress', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ set_id, word_id: currentWord.word_id, result }),
-      })
-      if (!response.ok) {
-        console.error('[CardStack] Failed to save grade:', response.status)
+      if (mode === 'daily') {
+        const response = await fetch('/api/progress', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ set_id, word_id: currentWord.word_id, result }),
+        })
+        if (!response.ok) {
+          console.error('[CardStack] Failed to save grade:', response.status)
+        }
       }
     } catch (err) {
       console.error('[CardStack] Network error saving grade:', err)
@@ -99,6 +112,9 @@ export default function CardStack({ initialSet, initialProgress }: Props) {
   if (preloading) return <GameLoadingScreen />
 
   if (currentIdx >= total) {
+    if (mode === 'practice') {
+      return <GameLoadingScreen />
+    }
     return <ScoreScreen words={words} results={results} onPlayAgain={handlePlayAgain} />
   }
 
