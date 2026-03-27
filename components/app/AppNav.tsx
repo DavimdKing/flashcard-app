@@ -9,6 +9,7 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard', icon: '🏠', mobileLabel: 'Home' },
   { label: 'Play Game',  href: '/play',      icon: '🎮', mobileLabel: 'Play' },
+  { label: 'Practice',  href: '/practice',  icon: '📚', mobileLabel: 'Practice' },
   { label: 'Settings',  href: '/settings',  icon: '⚙️', mobileLabel: 'Settings' },
 ]
 
