@@ -19,6 +19,7 @@ export default function PracticeBestScores() {
     fetch('/api/practice/groups')
       .then(r => r.ok ? r.json() : [])
       .then(setGroups)
+      .catch(() => setGroups([]))
       .finally(() => setLoading(false))
   }, [])
 

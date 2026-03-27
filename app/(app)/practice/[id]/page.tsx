@@ -35,13 +35,14 @@ export default async function PracticePlayPage({ params }: { params: Promise<{ i
 
   const { data: wordRows } = await service
     .from('practice_group_words')
-    .select('position, words(english_word, thai_translation, image_url, audio_url, part_of_speech, english_example, thai_example)')
+    .select('position, words(id, english_word, thai_translation, image_url, audio_url, part_of_speech, english_example, thai_example)')
     .eq('group_id', id)
     .order('position')
 
   interface WordRow {
     position: number
     words: {
+      id: string
       english_word: string
       thai_translation: string
       image_url: string | null
@@ -56,7 +57,7 @@ export default async function PracticePlayPage({ params }: { params: Promise<{ i
     ((wordRows ?? []) as unknown as WordRow[])
       .filter(r => r.words !== null)
       .map((r, idx) => ({
-        word_id: `${id}-${idx}`,
+        word_id: r.words!.id,
         position: idx + 1,
         english_word: r.words!.english_word,
         thai_translation: r.words!.thai_translation,

@@ -1,4 +1,5 @@
 import { createServiceClient } from '@/lib/supabase/service'
+import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { scoreColor } from '@/lib/score-color'
@@ -12,6 +13,14 @@ export default async function PracticeScorePage({
 }) {
   const { id } = await params
   const sp = await searchParams
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: appUser } = await supabase
+    .from('users').select('is_approved').eq('id', user.id).single()
+  if (!appUser?.is_approved) redirect('/access-denied')
 
   const pct  = Math.min(100, Math.max(0, parseInt(sp.pct  ?? '0', 10) || 0))
   const best = Math.min(100, Math.max(0, parseInt(sp.best ?? '0', 10) || 0))

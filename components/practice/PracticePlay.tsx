@@ -23,10 +23,10 @@ export default function PracticePlay({ groupId, practiceSet }: Props) {
         const { best_score, is_new_best } = await res.json()
         router.push(`/practice/${groupId}/score?pct=${scorePct}&best=${best_score}&new=${is_new_best ? 1 : 0}`)
       } else {
-        router.push(`/practice/${groupId}/score?pct=${scorePct}&best=${scorePct}&new=1`)
+        router.push(`/practice/${groupId}/score?pct=${scorePct}&best=${scorePct}&new=0`)
       }
     } catch {
-      router.push(`/practice/${groupId}/score?pct=${scorePct}&best=${scorePct}&new=1`)
+      router.push(`/practice/${groupId}/score?pct=${scorePct}&best=${scorePct}&new=0`)
     }
   }
 
