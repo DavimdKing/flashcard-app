@@ -9,6 +9,7 @@ const navLinks = [
   { href: '/admin/words', label: '📚 Word Database' },
   { href: '/admin/daily-set', label: '📅 Today\'s Set' },
   { href: '/admin/users', label: '👥 Users' },
+  { href: '/admin/practice-groups', label: '🗂️ Practice Groups' },
 ]
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
