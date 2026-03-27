@@ -18,21 +18,29 @@ export default function WordPicker({ selected, onChange, maxWords = 20 }: Props)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<WordResult[]>([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    if (!query.trim()) { setResults([]); return }
+    if (!query.trim()) { setResults([]); setError(null); return }
     debounceRef.current = setTimeout(async () => {
       setLoading(true)
+      setError(null)
       try {
         const res = await fetch(`/api/admin/practice-groups/words?q=${encodeURIComponent(query)}`)
+        if (!res.ok) { setError('Search failed'); return }
         const data = await res.json()
         setResults(data)
+      } catch {
+        setError('Search failed')
       } finally {
         setLoading(false)
       }
     }, 300)
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
   }, [query])
 
   const selectedIds = new Set(selected.map(w => w.id))
@@ -79,6 +87,7 @@ export default function WordPicker({ selected, onChange, maxWords = 20 }: Props)
         )}
         {loading && <p className="absolute right-3 top-2 text-xs text-gray-400">Searching…</p>}
       </div>
+      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
 
       <div className="flex flex-wrap gap-2">
         {selected.map(w => (

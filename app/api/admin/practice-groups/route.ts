@@ -33,13 +33,14 @@ export async function POST(request: Request) {
   if (error) return NextResponse.json({ error: 'Failed to create' }, { status: 500 })
 
   if (word_ids.length > 0) {
-    await service.rpc('replace_practice_group_words', {
+    const { error: rpcError } = await service.rpc('replace_practice_group_words', {
       p_group_id: group.id,
       p_name: name,
       p_icon: icon,
       p_is_active: !!is_active,
       p_word_ids: word_ids,
     })
+    if (rpcError) return NextResponse.json({ error: 'Failed to save words' }, { status: 500 })
   }
 
   return NextResponse.json({ id: group.id }, { status: 201 })

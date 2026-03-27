@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { NextResponse } from 'next/server'
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 async function requireAdmin() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -15,6 +17,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { id } = await params
+  if (!UUID_RE.test(id)) return NextResponse.json({ error: 'Invalid id' }, { status: 400 })
   const body = await request.json().catch(() => null)
   const { name, icon, is_active, word_ids } = (body ?? {}) as Record<string, unknown>
 
@@ -43,6 +46,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { id } = await params
+  if (!UUID_RE.test(id)) return NextResponse.json({ error: 'Invalid id' }, { status: 400 })
   const service = createServiceClient()
   const { error } = await service.from('practice_groups').delete().eq('id', id)
   if (error) return NextResponse.json({ error: 'Failed to delete' }, { status: 500 })
