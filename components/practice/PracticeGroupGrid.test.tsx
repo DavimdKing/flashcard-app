@@ -9,13 +9,13 @@ const groups: PracticeGroupSummary[] = [
 
 describe('PracticeGroupGrid', () => {
   it('renders group names', () => {
-    render(<PracticeGroupGrid groups={groups} onToggle={() => {}} />)
+    render(<PracticeGroupGrid groups={groups} onToggle={() => {}} onPreview={() => {}} />)
     expect(screen.getByText('Food & Drinks')).toBeInTheDocument()
     expect(screen.getByText('City Life')).toBeInTheDocument()
   })
 
   it('renders links to each group', () => {
-    render(<PracticeGroupGrid groups={groups} onToggle={() => {}} />)
+    render(<PracticeGroupGrid groups={groups} onToggle={() => {}} onPreview={() => {}} />)
     const links = screen.getAllByRole('link')
     expect(links.some(l => l.getAttribute('href') === '/practice/g1')).toBe(true)
     expect(links.some(l => l.getAttribute('href') === '/practice/g2')).toBe(true)

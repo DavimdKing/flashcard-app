@@ -19,26 +19,46 @@ const GRADIENTS = [
 interface Props {
   groups: PracticeGroupSummary[]
   onToggle: () => void
+  onPreview: (id: string) => void
 }
 
-export default function PracticeGroupGrid({ groups, onToggle }: Props) {
+export default function PracticeGroupGrid({ groups, onToggle, onPreview }: Props) {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold text-gray-800">Practice</h1>
-        <button onClick={onToggle}
-          className="flex items-center gap-1.5 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition">
+        <button
+          onClick={onToggle}
+          className="flex items-center gap-1.5 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition"
+        >
           ☰ List
         </button>
       </div>
+
       <div className="grid grid-cols-2 gap-3">
         {groups.map((g, i) => (
-          <Link key={g.id} href={`/practice/${g.id}`}
-            className={`bg-gradient-to-br ${GRADIENTS[i % GRADIENTS.length]} rounded-2xl p-5 flex flex-col items-center text-center shadow-sm hover:scale-[1.02] transition-transform`}>
-            <span className="text-4xl mb-2">{g.icon}</span>
-            <span className="font-bold text-white text-sm drop-shadow">{g.name}</span>
-            <span className="text-white/80 text-xs mt-1">20 words</span>
-          </Link>
+          <div key={g.id} className="relative">
+            <Link
+              href={`/practice/${g.id}`}
+              className={`bg-gradient-to-br ${GRADIENTS[i % GRADIENTS.length]} rounded-2xl p-5 flex flex-col items-center text-center shadow-sm hover:scale-[1.02] transition-transform block`}
+            >
+              <span className="text-4xl mb-2">{g.icon}</span>
+              <span className="font-bold text-white text-sm drop-shadow">
+                {g.name}
+              </span>
+              <span className="text-white/80 text-xs mt-1">20 words</span>
+            </Link>
+
+            {/* Preview button — overlays top-right of card */}
+            <button
+              onClick={() => onPreview(g.id)}
+              className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full bg-white/30 hover:bg-white/60 text-white text-sm transition"
+              title="Preview words"
+              aria-label={`Preview words in ${g.name}`}
+            >
+              👁
+            </button>
+          </div>
         ))}
       </div>
     </div>
