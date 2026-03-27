@@ -5,13 +5,14 @@ import { GET } from './route'
 
 const mockGetUser = jest.fn()
 const mockFrom = jest.fn()
-const mockRpc = jest.fn()
+const mockServiceFrom = jest.fn()
+const mockServiceRpc = jest.fn()
 
 jest.mock('@/lib/supabase/server', () => ({
   createClient: () => ({ auth: { getUser: mockGetUser }, from: mockFrom }),
 }))
 jest.mock('@/lib/supabase/service', () => ({
-  createServiceClient: () => ({ from: mockFrom, rpc: mockRpc }),
+  createServiceClient: () => ({ from: mockServiceFrom, rpc: mockServiceRpc }),
 }))
 
 describe('GET /api/practice/groups', () => {
