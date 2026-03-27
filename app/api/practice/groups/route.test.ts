@@ -20,7 +20,7 @@ describe('GET /api/practice/groups', () => {
 
   it('returns 401 when unauthenticated', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } })
-    const res = await GET(new Request('http://localhost/api/practice/groups'))
+    const res = await GET()
     expect(res.status).toBe(401)
   })
 
@@ -29,7 +29,7 @@ describe('GET /api/practice/groups', () => {
     mockFrom.mockReturnValue({
       select: () => ({ eq: () => ({ single: () => ({ data: { is_approved: false } }) }) }),
     })
-    const res = await GET(new Request('http://localhost/api/practice/groups'))
+    const res = await GET()
     expect(res.status).toBe(403)
   })
 })
