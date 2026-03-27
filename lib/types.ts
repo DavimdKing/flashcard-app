@@ -68,3 +68,11 @@ export interface SiteSettings {
   id: 1
   random_exclusion_days: number
 }
+
+export interface PracticeGroupSummary {
+  id: string
+  name: string
+  icon: string
+  word_count: 20
+  best_score: number | null
+}
