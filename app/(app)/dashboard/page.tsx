@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import ScoreChart, { type ScoreEntry } from '@/components/dashboard/ScoreChart'
 import StatCard from '@/components/dashboard/StatCard'
+import PracticeBestScores from '@/components/dashboard/PracticeBestScores'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -78,6 +79,7 @@ export default async function DashboardPage() {
           <StatCard placeholder />
         </div>
       )}
+      <PracticeBestScores />
     </main>
   )
 }
