@@ -43,6 +43,8 @@ export default function CardStack({ initialSet, initialProgress, mode = 'daily',
   const [saving, setSaving] = useState(false)
   const [preloading, setPreloading] = useState(true)
   const gradeBarTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // completedRef prevents either the practice or retake completion effect from firing twice.
+  // Invariant: mode is fixed for the component's lifetime; only one effect can ever trigger.
   const completedRef = useRef(false)
 
   // Preload all images and audio before showing first card (8-second timeout)
@@ -92,7 +94,7 @@ export default function CardStack({ initialSet, initialProgress, mode = 'daily',
 
   const handleGrade = async (result: GradeResult) => {
     if (saving || !currentWord) return
-    setSaving(true)
+    if (mode === 'daily') setSaving(true)
 
     // Daily mode: blocking save to /api/progress
     if (mode === 'daily') {
@@ -105,6 +107,8 @@ export default function CardStack({ initialSet, initialProgress, mode = 'daily',
         if (!response.ok) console.error('[CardStack] Failed to save grade:', response.status)
       } catch (err) {
         console.error('[CardStack] Network error saving grade:', err)
+      } finally {
+        setSaving(false)
       }
     }
 
@@ -127,7 +131,6 @@ export default function CardStack({ initialSet, initialProgress, mode = 'daily',
     setResults(prev => [...prev.filter(p => p.word_id !== currentWord.word_id), { word_id: currentWord.word_id, result }])
     setCurrentIdx(i => i + 1)
     setShowGradeBar(false)
-    setSaving(false)
   }
 
   const handlePlayAgain = () => {
