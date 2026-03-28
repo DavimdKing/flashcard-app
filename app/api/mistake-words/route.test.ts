@@ -1,12 +1,6 @@
 /** @jest-environment node */
 import { GET, POST } from './route'
 
-const mockSingle = jest.fn()
-const mockMaybeSingle = jest.fn()
-const mockOrder = jest.fn()
-const mockEqChain = jest.fn()
-const mockSelect = jest.fn()
-const mockUpsert = jest.fn()
 const mockGetUser = jest.fn()
 
 const mockFrom = jest.fn()

@@ -1,15 +1,18 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { requireApprovedUser, UUID_RE } from './_auth'
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-
-async function requireApprovedUser() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { user: null, supabase, error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
-  const { data: appUser } = await supabase.from('users').select('is_approved').eq('id', user.id).single()
-  if (!appUser?.is_approved) return { user: null, supabase, error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
-  return { user, supabase, error: null }
+interface Row {
+  word_id: string
+  created_at: string
+  words: {
+    english_word: string
+    part_of_speech: string | null
+    thai_translation: string
+    english_example: string | null
+    thai_example: string | null
+    image_url: string | null
+    audio_url: string | null
+  } | null
 }
 
 export async function GET() {
@@ -34,20 +37,6 @@ export async function GET() {
     .order('created_at', { ascending: false })
 
   if (dbError) return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 })
-
-  interface Row {
-    word_id: string
-    created_at: string
-    words: {
-      english_word: string
-      part_of_speech: string | null
-      thai_translation: string
-      english_example: string | null
-      thai_example: string | null
-      image_url: string | null
-      audio_url: string | null
-    } | null
-  }
 
   const result = ((data ?? []) as unknown as Row[])
     .filter(r => r.words !== null)
@@ -82,9 +71,10 @@ export async function POST(request: Request) {
     .from('words').select('id').eq('id', word_id).eq('is_deleted', false).single()
   if (!word) return NextResponse.json({ error: 'Word not found' }, { status: 404 })
 
-  await supabase
+  const { error: upsertError } = await supabase
     .from('mistake_words')
     .upsert({ user_id: user!.id, word_id }, { onConflict: 'user_id,word_id', ignoreDuplicates: true })
+  if (upsertError) return NextResponse.json({ error: 'Failed to save' }, { status: 500 })
 
   return NextResponse.json({ ok: true })
 }
