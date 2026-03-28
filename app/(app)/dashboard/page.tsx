@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import ScoreChart, { type ScoreEntry } from '@/components/dashboard/ScoreChart'
 import StatCard from '@/components/dashboard/StatCard'
+import MistakeWordsCard from '@/components/dashboard/MistakeWordsCard'
 import PracticeBestScores from '@/components/dashboard/PracticeBestScores'
 
 export default async function DashboardPage() {
@@ -76,7 +77,7 @@ export default async function DashboardPage() {
             value={`${bestScore}%`}
             valueColor="text-green-600"
           />
-          <StatCard placeholder />
+          <MistakeWordsCard userId={user.id} />
         </div>
       )}
       <PracticeBestScores />
