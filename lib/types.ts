@@ -76,3 +76,15 @@ export interface PracticeGroupSummary {
   word_count: 20
   best_score: number | null
 }
+
+export interface MistakeWord {
+  word_id: string
+  english_word: string
+  part_of_speech: string | null
+  thai_translation: string
+  english_example: string | null
+  thai_example: string | null
+  image_url: string | null
+  audio_url: string | null
+  created_at: string
+}
