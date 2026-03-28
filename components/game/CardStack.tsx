@@ -23,11 +23,12 @@ const GRADIENTS = [
 interface Props {
   initialSet: DailySetResponse
   initialProgress: ProgressResult[]
-  mode?: 'daily' | 'practice'
+  mode?: 'daily' | 'practice' | 'retake'
   onSessionComplete?: (scorePct: number) => void
+  onRetakeComplete?: (gotItWordIds: string[], nopeWordIds: string[]) => void
 }
 
-export default function CardStack({ initialSet, initialProgress, mode = 'daily', onSessionComplete }: Props) {
+export default function CardStack({ initialSet, initialProgress, mode = 'daily', onSessionComplete, onRetakeComplete }: Props) {
   const { words, set_id } = initialSet
   const total = words.length
 
@@ -74,6 +75,15 @@ export default function CardStack({ initialSet, initialProgress, mode = 'daily',
     onSessionComplete?.(scorePct)
   }, [currentIdx, total, mode, results, onSessionComplete])
 
+  // Retake mode completion
+  useEffect(() => {
+    if (mode !== 'retake' || currentIdx < total || completedRef.current) return
+    completedRef.current = true
+    const gotItWordIds = results.filter(r => r.result === 'got_it').map(r => r.word_id)
+    const nopeWordIds  = results.filter(r => r.result === 'nope').map(r => r.word_id)
+    onRetakeComplete?.(gotItWordIds, nopeWordIds)
+  }, [currentIdx, total, mode, results, onRetakeComplete])
+
   const currentWord = words[currentIdx]
 
   const handleFlipped = useCallback(() => {
@@ -83,20 +93,37 @@ export default function CardStack({ initialSet, initialProgress, mode = 'daily',
   const handleGrade = async (result: GradeResult) => {
     if (saving || !currentWord) return
     setSaving(true)
-    try {
-      if (mode === 'daily') {
+
+    // Daily mode: blocking save to /api/progress
+    if (mode === 'daily') {
+      try {
         const response = await fetch('/api/progress', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ set_id, word_id: currentWord.word_id, result }),
         })
-        if (!response.ok) {
-          console.error('[CardStack] Failed to save grade:', response.status)
-        }
+        if (!response.ok) console.error('[CardStack] Failed to save grade:', response.status)
+      } catch (err) {
+        console.error('[CardStack] Network error saving grade:', err)
       }
-    } catch (err) {
-      console.error('[CardStack] Network error saving grade:', err)
     }
+
+    // Practice mode: non-blocking nope recording
+    if (mode === 'practice' && result === 'nope') {
+      fetch('/api/mistake-words', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ word_id: currentWord.word_id }),
+      }).catch(err => console.error('[CardStack] Failed to record mistake word:', err))
+    }
+
+    // Retake mode: non-blocking removal on got_it
+    if (mode === 'retake' && result === 'got_it') {
+      fetch(`/api/mistake-words/${currentWord.word_id}`, {
+        method: 'DELETE',
+      }).catch(err => console.error('[CardStack] Failed to remove mistake word:', err))
+    }
+
     setResults(prev => [...prev.filter(p => p.word_id !== currentWord.word_id), { word_id: currentWord.word_id, result }])
     setCurrentIdx(i => i + 1)
     setShowGradeBar(false)
@@ -113,7 +140,7 @@ export default function CardStack({ initialSet, initialProgress, mode = 'daily',
   if (preloading) return <GameLoadingScreen />
 
   if (currentIdx >= total) {
-    if (mode === 'practice') {
+    if (mode === 'practice' || mode === 'retake') {
       return <GameLoadingScreen />
     }
     return <ScoreScreen words={words} results={results} onPlayAgain={handlePlayAgain} />
