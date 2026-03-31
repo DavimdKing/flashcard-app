@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import FlashCard from './FlashCard'
 
 const mockWord = {
@@ -69,10 +69,13 @@ describe('FlashCard — flip-back button', () => {
   })
 
   it('calls onFlipBack when flip-back button is clicked', () => {
+    jest.useFakeTimers()
     const onFlipBack = jest.fn()
     render(<FlashCard {...defaultProps} onFlipBack={onFlipBack} />)
     fireEvent.click(screen.getByTestId('card-body'))
+    act(() => { jest.advanceTimersByTime(500) })
     fireEvent.click(screen.getByRole('button', { name: /flip back/i }))
     expect(onFlipBack).toHaveBeenCalledTimes(1)
+    jest.useRealTimers()
   })
 })

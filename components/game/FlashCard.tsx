@@ -29,11 +29,12 @@ export default function FlashCard({ word, onFlipped, onFlipBack, onSwipeGotIt, b
   }, [isFlipped, ignoreClicks, onFlipped])
 
   const handleFlipBack = useCallback(() => {
+    if (ignoreClicks) return
     setIsFlipped(false)
     setIgnoreClicks(true)
     onFlipBack()
     setTimeout(() => setIgnoreClicks(false), 500)
-  }, [onFlipBack])
+  }, [ignoreClicks, onFlipBack])
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
