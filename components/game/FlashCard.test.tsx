@@ -105,11 +105,15 @@ describe('FlashCard — swipe gestures', () => {
 
   it('swipe right on front face does nothing', () => {
     const onFlipped = jest.fn()
-    render(<FlashCard {...defaultProps} onFlipped={onFlipped} />)
+    const onFlipBack = jest.fn()
+    const onSwipeGotIt = jest.fn()
+    render(<FlashCard {...defaultProps} onFlipped={onFlipped} onFlipBack={onFlipBack} onSwipeGotIt={onSwipeGotIt} />)
     const container = screen.getByTestId('card-container')
     fireEvent.touchStart(container, { touches: [{ clientX: 100, clientY: 300 }] })
     fireEvent.touchEnd(container, { changedTouches: [{ clientX: 200, clientY: 300 }] })
     expect(onFlipped).not.toHaveBeenCalled()
+    expect(onFlipBack).not.toHaveBeenCalled()
+    expect(onSwipeGotIt).not.toHaveBeenCalled()
   })
 
   it('swipe less than 50px does nothing', () => {
@@ -118,6 +122,24 @@ describe('FlashCard — swipe gestures', () => {
     const container = screen.getByTestId('card-container')
     fireEvent.touchStart(container, { touches: [{ clientX: 200, clientY: 300 }] })
     fireEvent.touchEnd(container, { changedTouches: [{ clientX: 160, clientY: 300 }] })
+    expect(onFlipped).not.toHaveBeenCalled()
+  })
+
+  it('swipe of exactly 50px triggers gesture', () => {
+    const onFlipped = jest.fn()
+    render(<FlashCard {...defaultProps} onFlipped={onFlipped} />)
+    const container = screen.getByTestId('card-container')
+    fireEvent.touchStart(container, { touches: [{ clientX: 200, clientY: 300 }] })
+    fireEvent.touchEnd(container, { changedTouches: [{ clientX: 150, clientY: 300 }] }) // dx=-50
+    expect(onFlipped).toHaveBeenCalledTimes(1)
+  })
+
+  it('swipe of exactly 49px does not trigger gesture', () => {
+    const onFlipped = jest.fn()
+    render(<FlashCard {...defaultProps} onFlipped={onFlipped} />)
+    const container = screen.getByTestId('card-container')
+    fireEvent.touchStart(container, { touches: [{ clientX: 200, clientY: 300 }] })
+    fireEvent.touchEnd(container, { changedTouches: [{ clientX: 151, clientY: 300 }] }) // dx=-49
     expect(onFlipped).not.toHaveBeenCalled()
   })
 
