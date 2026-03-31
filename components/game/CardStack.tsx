@@ -92,8 +92,21 @@ export default function CardStack({ initialSet, initialProgress, mode = 'daily',
     gradeBarTimerRef.current = setTimeout(() => setShowGradeBar(true), 500)
   }, [])
 
+  const handleFlipBack = useCallback(() => {
+    if (gradeBarTimerRef.current) {
+      clearTimeout(gradeBarTimerRef.current)
+      gradeBarTimerRef.current = null
+    }
+    setShowGradeBar(false)
+  }, [])
+
   const handleGrade = async (result: GradeResult) => {
     if (saving || !currentWord) return
+    // Cancel pending grade bar timer — prevents it firing on the next card
+    if (gradeBarTimerRef.current) {
+      clearTimeout(gradeBarTimerRef.current)
+      gradeBarTimerRef.current = null
+    }
     if (mode === 'daily') setSaving(true)
 
     // Daily mode: blocking save to /api/progress
@@ -165,6 +178,8 @@ export default function CardStack({ initialSet, initialProgress, mode = 'daily',
         key={currentWord.word_id}
         word={currentWord}
         onFlipped={handleFlipped}
+        onFlipBack={handleFlipBack}
+        onSwipeGotIt={() => handleGrade('got_it')}
         bgGradient={GRADIENTS[currentIdx % GRADIENTS.length]}
       />
 
