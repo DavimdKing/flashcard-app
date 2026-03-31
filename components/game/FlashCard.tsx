@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import SoundButton from '@/components/ui/SoundButton'
 import type { DailySetResponse } from '@/lib/types'
 
@@ -9,12 +9,16 @@ type WordData = DailySetResponse['words'][number]
 interface Props {
   word: WordData
   onFlipped: () => void
+  onFlipBack: () => void
+  onSwipeGotIt: () => void
   bgGradient: string
 }
 
-export default function FlashCard({ word, onFlipped, bgGradient }: Props) {
+export default function FlashCard({ word, onFlipped, onFlipBack, onSwipeGotIt, bgGradient }: Props) {
   const [isFlipped, setIsFlipped] = useState(false)
   const [ignoreClicks, setIgnoreClicks] = useState(false)
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null)
+  const mouseStartRef = useRef<{ x: number; y: number } | null>(null)
 
   const handleCardClick = useCallback(() => {
     if (isFlipped || ignoreClicks) return
@@ -24,13 +28,70 @@ export default function FlashCard({ word, onFlipped, bgGradient }: Props) {
     setTimeout(() => setIgnoreClicks(false), 500)
   }, [isFlipped, ignoreClicks, onFlipped])
 
+  const handleFlipBack = useCallback(() => {
+    setIsFlipped(false)
+    setIgnoreClicks(true)
+    onFlipBack()
+    setTimeout(() => setIgnoreClicks(false), 500)
+  }, [onFlipBack])
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+  }, [])
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current || ignoreClicks) { touchStartRef.current = null; return }
+    const dx = e.changedTouches[0].clientX - touchStartRef.current.x
+    const dy = e.changedTouches[0].clientY - touchStartRef.current.y
+    touchStartRef.current = null
+    if (Math.abs(dx) < 50 || Math.abs(dx) <= Math.abs(dy)) return
+    if (dx < 0) {
+      if (!isFlipped) handleCardClick()
+      else onSwipeGotIt()
+    } else if (isFlipped) {
+      handleFlipBack()
+    }
+  }, [ignoreClicks, isFlipped, handleCardClick, onSwipeGotIt, handleFlipBack])
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    mouseStartRef.current = { x: e.clientX, y: e.clientY }
+  }, [])
+
+  const handleMouseUp = useCallback((e: React.MouseEvent) => {
+    if (!mouseStartRef.current || ignoreClicks) { mouseStartRef.current = null; return }
+    const dx = e.clientX - mouseStartRef.current.x
+    const dy = e.clientY - mouseStartRef.current.y
+    mouseStartRef.current = null
+    if (Math.abs(dx) < 50 || Math.abs(dx) <= Math.abs(dy)) return
+    if (dx < 0) {
+      if (!isFlipped) handleCardClick()
+      else onSwipeGotIt()
+    } else if (isFlipped) {
+      handleFlipBack()
+    }
+  }, [ignoreClicks, isFlipped, handleCardClick, onSwipeGotIt, handleFlipBack])
+
   const imgVisible = isFlipped ? '' : 'opacity-0 pointer-events-none'
 
   return (
     <div
+      data-testid="card-container"
       className="relative w-full max-w-[420px] mx-auto"
       style={{ perspective: '1000px' }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
     >
+      {/* Flip-back button — rendered outside the 3D transform so visibility is CSS-only */}
+      <button
+        onClick={handleFlipBack}
+        className="absolute top-3 right-3 z-10 bg-white/20 hover:bg-white/30 text-white text-xs font-medium px-2 py-1 rounded-full transition"
+        style={{ opacity: isFlipped ? 1 : 0, pointerEvents: isFlipped ? 'auto' : 'none' }}
+        aria-label="Flip back to question"
+      >
+        ↩ flip
+      </button>
       <div
         className="relative w-full"
         style={{
