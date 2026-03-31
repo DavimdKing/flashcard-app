@@ -61,11 +61,11 @@ export default function AdminSidebar({ noImageCount, email }: Props) {
         )
       })}
 
-      {/* No Image link with badge */}
+      {/* No Image — separate from navLinks because it requires the badge */}
       <Link
         href="/admin/words/no-image"
         onClick={collapse}
-        className="flex items-center gap-2 px-2 py-2 rounded-xl text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition text-sm font-medium"
+        className={`flex items-center gap-2 px-2 py-2 rounded-xl text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition text-sm font-medium ${pathname === '/admin/words/no-image' ? 'bg-orange-50 text-orange-600' : ''}`}
       >
         <span className="text-base leading-none flex-shrink-0">🖼️</span>
         <span className={`flex items-center justify-between flex-1 whitespace-nowrap overflow-hidden ${collapsed ? 'hidden' : 'flex'} md:flex`}>
