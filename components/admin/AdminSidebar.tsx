@@ -26,8 +26,7 @@ export default function AdminSidebar({ noImageCount, email }: Props) {
 
   return (
     <aside
-      className="bg-white shadow-md flex flex-col p-4 gap-2 min-h-screen overflow-hidden transition-[width] duration-200 md:w-56"
-      style={{ width: collapsed ? '3rem' : '14rem' }}
+      className={`bg-white shadow-md flex flex-col p-4 gap-2 min-h-screen overflow-hidden transition-[width] duration-200 ${collapsed ? 'w-12' : 'w-56'} md:w-56`}
     >
       {/* Header / toggle */}
       <div className="flex items-center gap-2 mb-4 min-w-0">

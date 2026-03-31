@@ -3,7 +3,7 @@ import AdminSidebar from './AdminSidebar'
 
 jest.mock('next/navigation', () => ({
   usePathname: () => '/admin',
-  useRouter: () => ({ replace: jest.fn() }),
+  useRouter: () => ({ replace: jest.fn() }), // required by UserMenu child component
 }))
 
 describe('AdminSidebar', () => {
