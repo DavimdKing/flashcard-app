@@ -57,6 +57,8 @@ describe('FlashCard — existing behaviour', () => {
 })
 
 describe('FlashCard — flip-back button', () => {
+  afterEach(() => jest.useRealTimers())
+
   it('flip-back button is not visible before card is flipped', () => {
     render(<FlashCard {...defaultProps} />)
     expect(screen.queryByRole('button', { name: /flip back/i })).not.toBeVisible()
@@ -73,9 +75,18 @@ describe('FlashCard — flip-back button', () => {
     const onFlipBack = jest.fn()
     render(<FlashCard {...defaultProps} onFlipBack={onFlipBack} />)
     fireEvent.click(screen.getByTestId('card-body'))
-    act(() => { jest.advanceTimersByTime(500) })
+    act(() => { jest.advanceTimersByTime(501) })
     fireEvent.click(screen.getByRole('button', { name: /flip back/i }))
     expect(onFlipBack).toHaveBeenCalledTimes(1)
-    jest.useRealTimers()
+  })
+
+  it('does not call onFlipBack when clicked within debounce window', () => {
+    jest.useFakeTimers()
+    const onFlipBack = jest.fn()
+    render(<FlashCard {...defaultProps} onFlipBack={onFlipBack} />)
+    fireEvent.click(screen.getByTestId('card-body'))
+    // Still in debounce window — flip-back should be suppressed
+    fireEvent.click(screen.getByRole('button', { name: /flip back/i }))
+    expect(onFlipBack).not.toHaveBeenCalled()
   })
 })
