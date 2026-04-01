@@ -40,7 +40,6 @@ export default function CardStack({ initialSet, initialProgress, mode = 'daily',
   const [currentIdx, setCurrentIdx] = useState(showScore ? total : startIdx)
   const [showGradeBar, setShowGradeBar] = useState(false)
   const [results, setResults] = useState<ProgressResult[]>(initialProgress)
-  const [saving, setSaving] = useState(false)
   const [preloading, setPreloading] = useState(true)
   const gradeBarTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // completedRef prevents either the practice or retake completion effect from firing twice.
@@ -100,29 +99,21 @@ export default function CardStack({ initialSet, initialProgress, mode = 'daily',
     setShowGradeBar(false)
   }, [])
 
-  const handleGrade = async (result: GradeResult) => {
-    if (saving || !currentWord) return
+  const handleGrade = (result: GradeResult) => {
+    if (!currentWord) return
     // Cancel pending grade bar timer — prevents it firing on the next card
     if (gradeBarTimerRef.current) {
       clearTimeout(gradeBarTimerRef.current)
       gradeBarTimerRef.current = null
     }
-    if (mode === 'daily') setSaving(true)
 
-    // Daily mode: blocking save to /api/progress
+    // Daily mode: fire-and-forget (optimistic — card advances immediately)
     if (mode === 'daily') {
-      try {
-        const response = await fetch('/api/progress', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ set_id, word_id: currentWord.word_id, result }),
-        })
-        if (!response.ok) console.error('[CardStack] Failed to save grade:', response.status)
-      } catch (err) {
-        console.error('[CardStack] Network error saving grade:', err)
-      } finally {
-        setSaving(false)
-      }
+      fetch('/api/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ set_id, word_id: currentWord.word_id, result }),
+      }).catch(err => console.error('[CardStack] Failed to save grade:', err))
     }
 
     // Practice mode: non-blocking nope recording
@@ -185,7 +176,7 @@ export default function CardStack({ initialSet, initialProgress, mode = 'daily',
 
       {showGradeBar && (
         <div className="w-full max-w-[420px] mt-0 animate-slideUp">
-          <SelfGradeBar onGrade={handleGrade} disabled={saving} />
+          <SelfGradeBar onGrade={handleGrade} disabled={false} />
         </div>
       )}
     </div>
