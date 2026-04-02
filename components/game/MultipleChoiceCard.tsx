@@ -110,23 +110,22 @@ export default function MultipleChoiceCard({ word, bgGradient, onSubmit, onSwipe
             <h2 className="text-4xl font-bold text-white drop-shadow text-center">{word.english_word}</h2>
           </div>
 
-          {!submitted && (
-            <div className="flex flex-col gap-2 mb-3">
-              {word.choices.map((choice) => (
-                <button
-                  key={choice}
-                  onClick={() => setSelected(choice)}
-                  className={`w-full py-3 px-4 rounded-2xl text-center text-sm font-semibold transition border-2 ${
-                    selected === choice
-                      ? 'bg-white text-purple-700 border-white'
-                      : 'bg-white/25 text-white border-white/40'
-                  }`}
-                >
-                  {choice}
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="flex flex-col gap-2 mb-3">
+            {word.choices.map((choice) => (
+              <button
+                key={choice}
+                onClick={() => setSelected(choice)}
+                disabled={submitted}
+                className={`w-full py-3 px-4 rounded-2xl text-center text-sm font-semibold transition border-2 ${
+                  selected === choice
+                    ? 'bg-white text-purple-700 border-white'
+                    : 'bg-white/25 text-white border-white/40'
+                }`}
+              >
+                {choice}
+              </button>
+            ))}
+          </div>
 
           <button
             onClick={handleSubmit}
@@ -162,6 +161,8 @@ export default function MultipleChoiceCard({ word, bgGradient, onSubmit, onSwipe
                 {isCorrect ? 'Correct!' : `Wrong — correct: ${word.thai_translation}`}
               </div>
 
+              <h2 className="text-4xl font-bold text-white drop-shadow text-center">{word.thai_translation}</h2>
+
               {word.part_of_speech && (
                 <p className="text-sm font-semibold text-gray-700 tracking-wide uppercase">{word.part_of_speech}</p>
               )}
@@ -179,6 +180,13 @@ export default function MultipleChoiceCard({ word, bgGradient, onSubmit, onSwipe
 
               {word.english_example && (
                 <p className="text-sm text-gray-800 font-medium text-center px-2 leading-relaxed">{word.english_example}</p>
+              )}
+
+              {word.english_example && word.thai_example && (
+                <div className="w-10 h-px bg-gray-400/50" />
+              )}
+              {word.thai_example && (
+                <p className="text-sm text-gray-800 font-medium text-center px-2 leading-relaxed">{word.thai_example}</p>
               )}
             </>
           )}

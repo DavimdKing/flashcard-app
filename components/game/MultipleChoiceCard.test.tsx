@@ -97,7 +97,7 @@ describe('MultipleChoiceCard — after submit', () => {
   it('shows wrong badge with correct answer when wrong answer selected', () => {
     submitWrong()
     expect(screen.getByText(/wrong/i)).toBeInTheDocument()
-    expect(screen.getByText(/มากมาย/)).toBeInTheDocument()
+    expect(screen.getAllByText(/มากมาย/).length).toBeGreaterThan(0)
   })
 
   it('flip-back button is visible after submit', () => {
