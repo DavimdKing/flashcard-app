@@ -67,6 +67,8 @@ export default async function PracticePlayPage({ params }: { params: Promise<{ i
       }))
   )
 
+  if (sessionWords.length === 0) redirect('/practice')
+
   // Fetch distractor pool from words outside this group
   const sessionWordIds = sessionWords.map(w => w.word_id)
   const { data: poolRows } = await service
