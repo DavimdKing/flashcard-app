@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
+import { buildMultipleChoiceWords } from '@/lib/distractors'
 import MistakeRetakePlay from '@/components/mistake-words/MistakeRetakePlay'
-import type { MistakeWord } from '@/lib/types'
 
 function fisherYates<T>(arr: T[]): T[] {
   const a = [...arr]
@@ -27,7 +28,6 @@ export default async function MistakeRetakePage() {
     .from('mistake_words')
     .select(`
       word_id,
-      created_at,
       words (
         english_word,
         part_of_speech,
@@ -41,7 +41,6 @@ export default async function MistakeRetakePage() {
 
   interface Row {
     word_id: string
-    created_at: string
     words: {
       english_word: string
       part_of_speech: string | null
@@ -53,24 +52,39 @@ export default async function MistakeRetakePage() {
     } | null
   }
 
-  const allWords: MistakeWord[] = ((data ?? []) as unknown as Row[])
+  const allSessionWords = ((data ?? []) as unknown as Row[])
     .filter(r => r.words !== null)
     .map(r => ({
       word_id: r.word_id,
       english_word: r.words!.english_word,
-      part_of_speech: r.words!.part_of_speech,
       thai_translation: r.words!.thai_translation,
+      part_of_speech: r.words!.part_of_speech,
       english_example: r.words!.english_example,
       thai_example: r.words!.thai_example,
       image_url: r.words!.image_url,
       audio_url: r.words!.audio_url,
-      created_at: r.created_at,
     }))
 
-  // Guard: need at least 2 words to retake
-  if (allWords.length < 2) redirect('/mistake-words')
+  if (allSessionWords.length < 2) redirect('/mistake-words')
 
-  const words = fisherYates(allWords).slice(0, 20)
+  const sessionWords = fisherYates(allSessionWords).slice(0, 20)
+  const sessionWordIds = sessionWords.map(w => w.word_id)
+
+  // Fetch distractor pool from words outside the mistake list
+  const service = createServiceClient()
+  const { data: poolRows } = await service
+    .from('words')
+    .select('thai_translation')
+    .not('id', 'in', `(${sessionWordIds.join(',')})`)
+    .eq('is_deleted', false)
+    .order('id', { ascending: false })
+    .limit(sessionWordIds.length * 4)
+
+  const pool = (poolRows ?? []).map((r: { thai_translation: string }) => r.thai_translation)
+
+  if (pool.length === 0) redirect('/mistake-words')
+
+  const words = buildMultipleChoiceWords(sessionWords, pool)
 
   return (
     <main className="flex flex-col items-center pt-2">
