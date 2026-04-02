@@ -77,6 +77,18 @@ export interface PracticeGroupSummary {
   best_score: number | null
 }
 
+export interface MultipleChoiceWord {
+  word_id: string
+  english_word: string
+  thai_translation: string       // the correct answer
+  part_of_speech: string | null
+  image_url: string | null
+  audio_url: string | null
+  english_example: string | null
+  thai_example: string | null
+  choices: string[]              // 4 Thai strings, pre-shuffled; correct answer is among them
+}
+
 export interface MistakeWord {
   word_id: string
   english_word: string
