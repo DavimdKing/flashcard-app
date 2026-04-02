@@ -47,8 +47,9 @@ export default function MultipleChoiceCard({ word, bgGradient, onSubmit, onSwipe
     if (Math.abs(dx) < 50 || Math.abs(dx) <= Math.abs(dy)) return
     if (dx < 0 && isFlipped) onSwipeNext()
     else if (dx > 0 && isFlipped) handleFlipBack()
-    // swipe on front face: no-op (flip-lock enforced — Submit must be pressed first)
-  }, [ignoreClicks, isFlipped, onSwipeNext, handleFlipBack])
+    else if (dx < 0 && submitted) { setIgnoreClicks(true); setIsFlipped(true); setTimeout(() => setIgnoreClicks(false), 500) }
+    // swipe right on front face: no-op
+  }, [ignoreClicks, isFlipped, submitted, onSwipeNext, handleFlipBack])
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     mouseStartRef.current = { x: e.clientX, y: e.clientY }
@@ -62,7 +63,8 @@ export default function MultipleChoiceCard({ word, bgGradient, onSubmit, onSwipe
     if (Math.abs(dx) < 50 || Math.abs(dx) <= Math.abs(dy)) return
     if (dx < 0 && isFlipped) onSwipeNext()
     else if (dx > 0 && isFlipped) handleFlipBack()
-  }, [ignoreClicks, isFlipped, onSwipeNext, handleFlipBack])
+    else if (dx < 0 && submitted) { setIgnoreClicks(true); setIsFlipped(true); setTimeout(() => setIgnoreClicks(false), 500) }
+  }, [ignoreClicks, isFlipped, submitted, onSwipeNext, handleFlipBack])
 
   const isCorrect = submitted && selected === word.thai_translation
   const imgVisible = isFlipped ? '' : 'opacity-0 pointer-events-none'
