@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { toBangkokDateString } from '@/lib/bangkok-date'
+import { buildMultipleChoiceWords } from '@/lib/distractors'
 import { redirect } from 'next/navigation'
-import CardStack from '@/components/game/CardStack'
-import type { DailySetResponse, ProgressResult } from '@/lib/types'
+import DailyPlay from '@/components/game/DailyPlay'
 
 export default async function PlayPage() {
   const supabase = await createClient()
@@ -31,11 +31,10 @@ export default async function PlayPage() {
     .select('word_id, position, words(english_word, thai_translation, image_url, audio_url, part_of_speech, english_example, thai_example)')
     .eq('set_id', set.id)
 
-  const words = (wordRows ?? [])
+  const sessionWords = (wordRows ?? [])
     .filter((w: any) => w.words != null)
     .map((w: any) => ({
       word_id: w.word_id,
-      position: w.position,
       english_word: w.words.english_word,
       thai_translation: w.words.thai_translation,
       image_url: w.words.image_url,
@@ -46,22 +45,26 @@ export default async function PlayPage() {
     }))
     .sort((a: any, b: any) => a.position - b.position)
 
-  const dailySet: DailySetResponse = { set_id: set.id, set_date: set.set_date, words }
+  if (sessionWords.length === 0) redirect('/no-set')
 
-  const { data: progressRows } = await service
-    .from('user_progress')
-    .select('word_id, result')
-    .eq('user_id', user.id)
-    .eq('set_id', set.id)
+  const sessionWordIds = sessionWords.map((w: any) => w.word_id)
+  const { data: poolRows } = await service
+    .from('words')
+    .select('thai_translation')
+    .not('id', 'in', `(${sessionWordIds.join(',')})`)
+    .eq('is_deleted', false)
+    .order('id', { ascending: false })
+    .limit(sessionWordIds.length * 4)
 
-  const initialProgress: ProgressResult[] = (progressRows ?? []).map((p: any) => ({
-    word_id: p.word_id,
-    result: p.result,
-  }))
+  const pool = (poolRows ?? []).map((r: { thai_translation: string }) => r.thai_translation)
+
+  if (pool.length === 0) redirect('/no-set')
+
+  const words = buildMultipleChoiceWords(sessionWords, pool)
 
   return (
     <main className="flex flex-col items-center pt-2">
-      <CardStack initialSet={dailySet} initialProgress={initialProgress} />
+      <DailyPlay words={words} />
     </main>
   )
 }

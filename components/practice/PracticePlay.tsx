@@ -1,15 +1,15 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import MultipleChoiceStack from '@/components/game/MultipleChoiceStack'
-import type { MultipleChoiceWord } from '@/lib/types'
+import CardStack from '@/components/game/CardStack'
+import type { DailySetResponse } from '@/lib/types'
 
 interface Props {
   groupId: string
-  words: MultipleChoiceWord[]
+  practiceSet: DailySetResponse
 }
 
-export default function PracticePlay({ groupId, words }: Props) {
+export default function PracticePlay({ groupId, practiceSet }: Props) {
   const router = useRouter()
 
   const handleSessionComplete = async (scorePct: number) => {
@@ -31,8 +31,9 @@ export default function PracticePlay({ groupId, words }: Props) {
   }
 
   return (
-    <MultipleChoiceStack
-      words={words}
+    <CardStack
+      initialSet={practiceSet}
+      initialProgress={[]}
       mode="practice"
       onSessionComplete={handleSessionComplete}
     />

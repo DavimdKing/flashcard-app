@@ -21,7 +21,7 @@ const GRADIENTS = [
 type Props =
   | {
       words: MultipleChoiceWord[]
-      mode: 'practice'
+      mode: 'daily' | 'practice'
       onSessionComplete: (scorePct: number) => void
       onRetakeComplete?: never
     }
@@ -38,9 +38,9 @@ export default function MultipleChoiceStack({ words, mode, onSessionComplete, on
   const [results, setResults] = useState<ProgressResult[]>([])
   const completedRef = useRef(false)
 
-  // Practice mode completion — identical pattern to CardStack
+  // Daily / practice mode completion
   useEffect(() => {
-    if (mode !== 'practice' || currentIdx < total || completedRef.current) return
+    if (mode === 'retake' || currentIdx < total || completedRef.current) return
     completedRef.current = true
     const gotItCount = results.filter(r => r.result === 'got_it').length
     const scorePct = Math.round(gotItCount / total * 100)

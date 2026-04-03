@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { buildMultipleChoiceWords } from '@/lib/distractors'
 import PracticePlay from '@/components/practice/PracticePlay'
+import type { DailySetResponse } from '@/lib/types'
 
 function fisherYates<T>(arr: T[]): T[] {
   const a = [...arr]
@@ -52,11 +52,12 @@ export default async function PracticePlayPage({ params }: { params: Promise<{ i
     } | null
   }
 
-  const sessionWords = fisherYates(
+  const shuffled = fisherYates(
     ((wordRows ?? []) as unknown as WordRow[])
       .filter(r => r.words !== null)
-      .map(r => ({
+      .map((r, idx) => ({
         word_id: r.words!.id,
+        position: idx + 1,
         english_word: r.words!.english_word,
         thai_translation: r.words!.thai_translation,
         image_url: r.words!.image_url,
@@ -67,27 +68,13 @@ export default async function PracticePlayPage({ params }: { params: Promise<{ i
       }))
   )
 
-  if (sessionWords.length === 0) redirect('/practice')
+  if (shuffled.length === 0) redirect('/practice')
 
-  // Fetch distractor pool from words outside this group
-  const sessionWordIds = sessionWords.map(w => w.word_id)
-  const { data: poolRows } = await service
-    .from('words')
-    .select('thai_translation')
-    .not('id', 'in', `(${sessionWordIds.join(',')})`)
-    .eq('is_deleted', false)
-    .order('id', { ascending: false })
-    .limit(sessionWordIds.length * 4)
-
-  const pool = (poolRows ?? []).map((r: { thai_translation: string }) => r.thai_translation)
-
-  if (pool.length === 0) redirect('/practice')
-
-  const words = buildMultipleChoiceWords(sessionWords, pool)
+  const practiceSet: DailySetResponse = { set_id: '', set_date: '', words: shuffled }
 
   return (
     <main className="flex flex-col items-center pt-2">
-      <PracticePlay groupId={id} words={words} />
+      <PracticePlay groupId={id} practiceSet={practiceSet} />
     </main>
   )
 }
