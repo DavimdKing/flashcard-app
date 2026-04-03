@@ -1,24 +1,19 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import MultipleChoiceStack from '@/components/game/MultipleChoiceStack'
-import type { MultipleChoiceWord } from '@/lib/types'
-
-interface RetakeWord {
-  word_id: string
-  english_word: string
-}
+import CardStack from '@/components/game/CardStack'
+import type { DailySetResponse } from '@/lib/types'
 
 interface Props {
-  words: MultipleChoiceWord[]
+  practiceSet: DailySetResponse
 }
 
-export default function MistakeRetakePlay({ words }: Props) {
+export default function MistakeRetakePlay({ practiceSet }: Props) {
   const router = useRouter()
 
   const handleRetakeComplete = (gotItWordIds: string[], nopeWordIds: string[]) => {
-    const toWord = (id: string): RetakeWord => {
-      const w = words.find(x => x.word_id === id)!
+    const toWord = (id: string) => {
+      const w = practiceSet.words.find(x => x.word_id === id)!
       return { word_id: id, english_word: w.english_word }
     }
     const payload = {
@@ -30,8 +25,9 @@ export default function MistakeRetakePlay({ words }: Props) {
   }
 
   return (
-    <MultipleChoiceStack
-      words={words}
+    <CardStack
+      initialSet={practiceSet}
+      initialProgress={[]}
       mode="retake"
       onRetakeComplete={handleRetakeComplete}
     />
