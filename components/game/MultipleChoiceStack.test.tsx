@@ -38,6 +38,52 @@ beforeEach(() => {
 })
 afterEach(() => jest.useRealTimers())
 
+describe('MultipleChoiceStack — daily mode progress saving', () => {
+  it('fires /api/progress POST on correct answer in daily mode', () => {
+    render(
+      <MultipleChoiceStack
+        words={words}
+        mode="daily"
+        setId="set-123"
+        onSessionComplete={jest.fn()}
+      />
+    )
+    submitCard('หนึ่ง')  // correct for word1
+    expect(fetch).toHaveBeenCalledWith('/api/progress', expect.objectContaining({
+      method: 'POST',
+      body: JSON.stringify({ set_id: 'set-123', word_id: 'w1', result: 'got_it' }),
+    }))
+  })
+
+  it('fires /api/progress POST with result nope on wrong answer in daily mode', () => {
+    render(
+      <MultipleChoiceStack
+        words={words}
+        mode="daily"
+        setId="set-123"
+        onSessionComplete={jest.fn()}
+      />
+    )
+    submitCard('สอง')  // wrong for word1
+    expect(fetch).toHaveBeenCalledWith('/api/progress', expect.objectContaining({
+      method: 'POST',
+      body: JSON.stringify({ set_id: 'set-123', word_id: 'w1', result: 'nope' }),
+    }))
+  })
+
+  it('does not fire /api/progress in practice mode', () => {
+    render(
+      <MultipleChoiceStack
+        words={words}
+        mode="practice"
+        onSessionComplete={jest.fn()}
+      />
+    )
+    submitCard('หนึ่ง')  // correct — no fetch at all
+    expect(fetch).not.toHaveBeenCalled()
+  })
+})
+
 describe('MultipleChoiceStack — progress', () => {
   it('shows 0/N progress at start', () => {
     render(<MultipleChoiceStack words={words} mode="practice" onSessionComplete={jest.fn()} />)

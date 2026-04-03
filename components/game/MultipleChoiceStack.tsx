@@ -21,7 +21,14 @@ const GRADIENTS = [
 type Props =
   | {
       words: MultipleChoiceWord[]
-      mode: 'daily' | 'practice'
+      mode: 'daily'
+      setId: string
+      onSessionComplete: (scorePct: number) => void
+      onRetakeComplete?: never
+    }
+  | {
+      words: MultipleChoiceWord[]
+      mode: 'practice'
       onSessionComplete: (scorePct: number) => void
       onRetakeComplete?: never
     }
@@ -32,7 +39,9 @@ type Props =
       onSessionComplete?: never
     }
 
-export default function MultipleChoiceStack({ words, mode, onSessionComplete, onRetakeComplete }: Props) {
+export default function MultipleChoiceStack(props: Props) {
+  const { words, mode, onSessionComplete, onRetakeComplete } = props
+  const setId = props.mode === 'daily' ? props.setId : undefined
   const total = words.length
   const [currentIdx, setCurrentIdx] = useState(0)
   const [results, setResults] = useState<ProgressResult[]>([])
@@ -68,6 +77,14 @@ export default function MultipleChoiceStack({ words, mode, onSessionComplete, on
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ word_id: word.word_id }),
       }).catch(err => console.error('[MultipleChoiceStack] Failed to record mistake word:', err))
+    }
+
+    if (mode === 'daily' && setId) {
+      fetch('/api/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ set_id: setId, word_id: word.word_id, result: correct ? 'got_it' : 'nope' }),
+      }).catch(err => console.error('[MultipleChoiceStack] Failed to save progress:', err))
     }
 
     if (mode === 'retake' && correct) {
