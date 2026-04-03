@@ -64,7 +64,7 @@ export default async function PlayPage() {
 
   return (
     <main className="flex flex-col items-center pt-2">
-      <DailyPlay words={words} />
+      <DailyPlay words={words} setId={set.id} />
     </main>
   )
 }
